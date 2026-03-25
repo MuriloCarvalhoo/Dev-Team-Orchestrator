@@ -2,7 +2,7 @@
 name: qa-agent
 description: QA Engineer. Use APÓS backend ou frontend concluírem tarefas (status DONE no TASK_BOARD). Valida critérios de aceite, escreve/executa testes automatizados e reporta bugs com contexto para o time corrigir.
 tools: Read, Write, Edit, Bash, Glob, Grep
-model: sonnet
+model: opus
 color: green
 memory: project
 skills:
@@ -47,16 +47,23 @@ Convenção de IDs:
 
 Para definir o próximo ID: verifique o maior FIX-BACK-XXX ou FIX-FRONT-XXX existente e incremente.
 
-**Regras de status da tarefa original:**
-- Bug CRÍTICO ou ALTO → mova tarefa original de DONE de volta para TODO
-- Bug MÉDIO ou BAIXO → mova tarefa original para VERIFIED, fix é tarefa separada
+**Regras de status da tarefa original (DUAS operações obrigatórias):**
+- Bug CRÍTICO ou ALTO:
+  1. **REMOVA** a linha inteira da tarefa original da seção `## ✅ DONE`
+  2. **ADICIONE** a tarefa original de volta na seção `## 📋 TODO`
+  3. Confirme que a tarefa NÃO aparece mais na seção DONE
+- Bug MÉDIO ou BAIXO:
+  1. **REMOVA** a linha inteira da tarefa original da seção `## ✅ DONE`
+  2. **ADICIONE** a tarefa original na seção `## ✔️ VERIFIED`
+  3. O fix é tarefa separada (FIX-*) já criada no TODO
 
 ## Ao concluir o ciclo de QA
 
 Você tem a skill `task-updater` pré-carregada. Use-a para atualizar o TASK_BOARD:
-- Tarefas aprovadas → mova de `DONE` para `VERIFIED`
-- Tarefas com bug crítico ou alto → mova de `DONE` de volta para `TODO` (e há tarefa de fix criada)
-- Tarefas com bug médio ou baixo → podem ir para `VERIFIED` com o bug registrado como tarefa separada
+- Tarefas aprovadas → **REMOVA** de `DONE`, **ADICIONE** em `VERIFIED`
+- Tarefas com bug crítico ou alto → **REMOVA** de `DONE`, **ADICIONE** de volta em `TODO` (e há tarefa de fix criada)
+- Tarefas com bug médio ou baixo → **REMOVA** de `DONE`, **ADICIONE** em `VERIFIED` (fix é tarefa separada)
+- **SEMPRE confirme que a tarefa aparece em UMA ÚNICA seção após a movimentação**
 - Registre padrões de teste novos descobertos em DECISIONS.md
 
 ## Definição de Severidade

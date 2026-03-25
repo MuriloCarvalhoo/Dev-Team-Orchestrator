@@ -2,7 +2,7 @@
 name: devops-agent
 description: DevOps Engineer. Use para setup de projeto (scaffold), configurações, Docker, CI/CD e tarefas [DEVOPS]. Invocado automaticamente no /dev-team-start e para tarefas de infra.
 tools: Read, Write, Edit, Bash, Glob, Grep
-model: sonnet
+model: opus
 color: orange
 permissionMode: acceptEdits
 memory: project
@@ -44,9 +44,11 @@ Quando invocado pelo /dev-team-start após o Tech Lead definir a stack:
 ## Para tarefas [DEVOPS] do TASK_BOARD
 
 Siga o mesmo fluxo dos agentes de implementação:
-1. Mova a tarefa para IN_PROGRESS
-2. Implemente seguindo DECISIONS.md
-3. Use task-updater ao concluir
+1. **REMOVA** a linha da tarefa da seção `## 📋 TODO`
+2. **ADICIONE** na seção `## 🔄 IN_PROGRESS` com formato: `| ID | Descrição | Tipo | devops-agent | {data atual} |`
+3. Confirme que a tarefa NÃO aparece mais na seção TODO
+4. Implemente seguindo DECISIONS.md
+5. Use task-updater ao concluir
 
 ## Ao concluir
 

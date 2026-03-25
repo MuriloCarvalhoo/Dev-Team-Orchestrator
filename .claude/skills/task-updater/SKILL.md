@@ -6,33 +6,55 @@ user-invocable: false
 
 # Task Updater
 
-Execute as atualizações abaixo em sequência ao finalizar ou interromper uma tarefa. Não pule etapas — estes docs são o único estado compartilhado entre agentes.
+Execute as atualizações abaixo em sequência ao iniciar, finalizar ou interromper uma tarefa. Não pule etapas — estes docs são o único estado compartilhado entre agentes.
+
+**REGRA CRÍTICA**: Mover uma tarefa significa SEMPRE duas operações atômicas:
+1. **REMOVA** a linha inteira da tarefa da seção de origem
+2. **ADICIONE** a linha na seção de destino
+Nunca faça apenas uma das duas. Se a tarefa aparecer em duas seções ao mesmo tempo, o board está corrompido.
 
 ## 1. Atualizar TASK_BOARD.md
 
 Abra `docs/project-state/TASK_BOARD.md` e:
 
-**Se a tarefa foi CONCLUÍDA:**
-- Remova a linha da seção `## 🔄 IN_PROGRESS`
-- Adicione na seção `## ✅ DONE` com a data atual
+**Se a tarefa está sendo INICIADA (TODO → IN_PROGRESS):**
+- **REMOVA** a linha inteira da tarefa da seção `## 📋 TODO`
+- **ADICIONE** na seção `## 🔄 IN_PROGRESS` com formato: `| ID | Descrição | Tipo | {seu agente} | {data atual} |`
+- Confirme visualmente que a tarefa NÃO aparece mais na seção TODO
 
-**Se a tarefa foi BLOQUEADA:**
-- Remova de `IN_PROGRESS`
-- Adicione na seção `## 🚫 BLOCKED` com motivo claro e objetivo (o tech-lead-agent vai ler esse motivo)
-- Formato: `| ID | Descrição | [motivo específico, não genérico] |`
+**Se a tarefa foi CONCLUÍDA (IN_PROGRESS → DONE):**
+- **REMOVA** a linha inteira da tarefa da seção `## 🔄 IN_PROGRESS`
+- **ADICIONE** na seção `## ✅ DONE` com formato: `| ID | Descrição | Tipo | {data atual} |`
+- Confirme visualmente que a tarefa NÃO aparece mais na seção IN_PROGRESS
+
+**Se a tarefa foi BLOQUEADA (IN_PROGRESS → BLOCKED):**
+- **REMOVA** a linha inteira da tarefa da seção `## 🔄 IN_PROGRESS`
+- **ADICIONE** na seção `## 🚫 BLOCKED` com formato: `| ID | Descrição | [motivo específico, não genérico] |`
+- O tech-lead-agent vai ler esse motivo para desbloquear
 
 **Se a tarefa foi INTERROMPIDA no meio:**
 - Deixe em `IN_PROGRESS` (não mova)
 - Vá para o passo 3 (HANDOFF) obrigatoriamente
 
-**Se o QA aprovou (VERIFIED):**
-- Remova de `DONE`
-- Adicione em `## ✔️ VERIFIED` com a data
+**Se o QA aprovou (DONE → VERIFIED):**
+- **REMOVA** a linha inteira da tarefa da seção `## ✅ DONE`
+- **ADICIONE** na seção `## ✔️ VERIFIED` com formato: `| ID | Descrição | Tipo | {data atual} |`
+- Confirme visualmente que a tarefa NÃO aparece mais na seção DONE
 
 **Se o QA encontrou bug e criou tarefa FIX-:**
-- Se bug CRÍTICO/ALTO: mova tarefa original de `DONE` de volta para `TODO`
-- Se bug MÉDIO/BAIXO: mova tarefa original para `VERIFIED`
+- Se bug CRÍTICO/ALTO:
+  - **REMOVA** a linha inteira da tarefa original da seção `## ✅ DONE`
+  - **ADICIONE** a tarefa original de volta na seção `## 📋 TODO`
+  - Confirme visualmente que a tarefa NÃO aparece mais na seção DONE
+- Se bug MÉDIO/BAIXO:
+  - **REMOVA** a linha inteira da tarefa original da seção `## ✅ DONE`
+  - **ADICIONE** a tarefa original na seção `## ✔️ VERIFIED`
 - A tarefa FIX-BACK-XXX ou FIX-FRONT-XXX já foi criada na seção TODO pelo QA
+
+**Se a tarefa foi DESBLOQUEADA (BLOCKED → TODO):**
+- **REMOVA** a linha inteira da tarefa da seção `## 🚫 BLOCKED`
+- **ADICIONE** de volta na seção `## 📋 TODO`
+- Confirme visualmente que a tarefa NÃO aparece mais na seção BLOCKED
 
 ## 2. Atualizar PROGRESS.md
 
@@ -97,8 +119,10 @@ Para descobrir o próximo ID: liste as decisões existentes em DECISIONS.md e in
 
 ## Gotchas
 
+- ❌ NUNCA adicione uma tarefa em uma seção sem REMOVER da seção anterior — isso causa duplicatas
 - ❌ Não pule o PROGRESS.md — é o histórico auditável e o QA usa para saber onde testar
 - ❌ HANDOFF vago = próxima instância vai começar do zero em vez de continuar
 - ❌ "Próximo passo exato" genérico ("continue implementando") não ajuda — seja preciso
+- ✅ Após cada movimentação, releia o TASK_BOARD e confirme que a tarefa aparece em UMA ÚNICA seção
 - ✅ Se houver nova API implementada, registre o schema completo em DECISIONS.md
 - ✅ Atualizar os docs é tão importante quanto implementar — não pule por "falta de tempo"

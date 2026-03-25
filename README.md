@@ -17,8 +17,9 @@ Usuário
   |                          -- DevOps Agent (sonnet)   -> implementa [DEVOPS]
   |                          -- Tech Lead Agent (opus)  -> auto-desbloqueio de BLOCKED
   |
-  |-- /dev-team-next-parallel -- Mesmo que /dev-team-next, mas lanca agentes
-  |                             independentes em paralelo via worktrees
+  |-- /dev-team-next-parallel -- Loop autonomo: lanca tarefas em paralelo,
+  |                             roda QA, corrige bugs, repete ate concluir
+  |                             (todos os agentes usam Opus 4.6)
   |
   |-- /dev-team-review       -- QA Agent (sonnet)       -> valida DONE -> VERIFIED
   |
@@ -129,10 +130,10 @@ Bugs: QA cria tarefa FIX-XXX [BACK|FRONT] diretamente no TODO
 |---|---|---|
 | `po-agent` | opus | PRD fornecido, backlog vazio ou precisa de novas tarefas |
 | `tech-lead-agent` | opus | Stack indefinida, tarefa BLOCKED, conflito tecnico |
-| `backend-agent` | sonnet | Tarefa [BACK] disponivel no TASK_BOARD |
-| `frontend-agent` | sonnet | Tarefa [FRONT] disponivel no TASK_BOARD |
-| `devops-agent` | sonnet | Setup de projeto, CI/CD, Docker, infra |
-| `qa-agent` | sonnet | Tarefas com status DONE no TASK_BOARD |
+| `backend-agent` | opus | Tarefa [BACK] disponivel no TASK_BOARD |
+| `frontend-agent` | opus | Tarefa [FRONT] disponivel no TASK_BOARD |
+| `devops-agent` | opus | Setup de projeto, CI/CD, Docker, infra |
+| `qa-agent` | opus | Tarefas com status DONE no TASK_BOARD |
 
 ## Boas praticas
 

@@ -47,10 +47,11 @@ Para cada tarefa:
 3. Valide cada critério de aceite — um por um, sem pular nenhum
 4. Teste edge cases: input inválido, dados vazios, permissões, limites
 5. Reporte bugs com severidade (CRÍTICO/ALTO/MÉDIO/BAIXO) e passos exatos para reproduzir
-6. Atualize o TASK_BOARD:
-   - Aprovada: mova de DONE para VERIFIED
-   - Bug crítico/alto: mova de DONE para TODO (crie tarefa de fix)
-   - Bug médio/baixo: mova para VERIFIED mas crie tarefa de fix separada
+6. Atualize o TASK_BOARD (DUAS operações obrigatórias por tarefa):
+   - Aprovada: REMOVA a linha da seção DONE, ADICIONE na seção VERIFIED
+   - Bug crítico/alto: REMOVA a linha da seção DONE, ADICIONE na seção TODO (crie tarefa de fix)
+   - Bug médio/baixo: REMOVA a linha da seção DONE, ADICIONE na seção VERIFIED (crie tarefa de fix separada)
+   - CONFIRME que cada tarefa aparece em UMA ÚNICA seção após movimentação
 
 Siga seu protocolo completo.
 ")

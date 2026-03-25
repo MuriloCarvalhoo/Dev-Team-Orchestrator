@@ -27,7 +27,7 @@ Motivo do bloqueio no TASK_BOARD: {MOTIVO}
 Siga seu protocolo:
 1. Tome uma decisão clara e definitiva
 2. Registre em DECISIONS.md (formato DEC-XXX)
-3. Mova a tarefa de BLOCKED para TODO no TASK_BOARD
+3. No TASK_BOARD: REMOVA a tarefa da secao BLOCKED, ADICIONE na secao TODO. Confirme que NAO aparece em ambas.
 4. Escreva orientações de retomada em HANDOFF.md
 ")
 ```
@@ -85,7 +85,7 @@ Contexto de HANDOFF.md — esta tarefa foi interrompida:
 {CONTEÚDO DO HANDOFF PARA ESTA TAREFA}
 }
 
-Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemente, atualize os docs ao concluir.
+Siga seu protocolo: leia os docs compartilhados, REMOVA a tarefa da secao TODO e ADICIONE na secao IN_PROGRESS, implemente, atualize os docs ao concluir. Confirme que a tarefa aparece em UMA UNICA secao apos cada movimentacao.
 ")
 ```
 
@@ -108,7 +108,7 @@ Contexto de HANDOFF.md — esta tarefa foi interrompida:
 {CONTEÚDO DO HANDOFF PARA ESTA TAREFA}
 }
 
-Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemente, atualize os docs ao concluir.
+Siga seu protocolo: leia os docs compartilhados, REMOVA a tarefa da secao TODO e ADICIONE na secao IN_PROGRESS, implemente, atualize os docs ao concluir. Confirme que a tarefa aparece em UMA UNICA secao apos cada movimentacao.
 ")
 ```
 
@@ -131,7 +131,7 @@ Contexto de HANDOFF.md — esta tarefa foi interrompida:
 {CONTEÚDO DO HANDOFF PARA ESTA TAREFA}
 }
 
-Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemente, atualize os docs ao concluir.
+Siga seu protocolo: leia os docs compartilhados, REMOVA a tarefa da secao TODO e ADICIONE na secao IN_PROGRESS, implemente, atualize os docs ao concluir. Confirme que a tarefa aparece em UMA UNICA secao apos cada movimentacao.
 ")
 ```
 
