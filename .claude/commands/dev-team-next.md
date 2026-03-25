@@ -8,8 +8,34 @@ Executa a próxima tarefa disponível no TASK_BOARD.
 /dev-team-next            # próxima tarefa disponível (priorizando BACK)
 /dev-team-next BACK       # força tarefa backend
 /dev-team-next FRONT      # força tarefa frontend
+/dev-team-next DEVOPS     # força tarefa devops
 /dev-team-next BACK-003   # executa tarefa específica por ID
 ```
+
+## Auto-desbloqueio
+
+Antes de selecionar a tarefa, verifique se há tarefas BLOCKED no TASK_BOARD.
+Se houver:
+
+1. Para cada tarefa BLOCKED, invoque o tech-lead-agent automaticamente:
+
+```
+Agent(subagent_type="tech-lead-agent", prompt="
+Desbloqueie a tarefa {ID}.
+Motivo do bloqueio no TASK_BOARD: {MOTIVO}
+
+Siga seu protocolo:
+1. Tome uma decisão clara e definitiva
+2. Registre em DECISIONS.md (formato DEC-XXX)
+3. Mova a tarefa de BLOCKED para TODO no TASK_BOARD
+4. Escreva orientações de retomada em HANDOFF.md
+")
+```
+
+2. Após desbloquear, continue com a seleção normal de tarefa
+3. Se o tech-lead não conseguir desbloquear (motivo externo — ex: "precisa de credenciais AWS do cliente"):
+   → Informe o usuário: "Tarefa {ID} requer intervenção manual: {motivo}"
+   → Continue selecionando entre as tarefas desbloqueadas
 
 ## Lógica de seleção de tarefa
 
@@ -86,6 +112,29 @@ Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemen
 ")
 ```
 
+## Execução para tarefas [DEVOPS]
+
+```
+Agent(subagent_type="devops-agent", prompt="
+Execute a tarefa {ID}.
+
+Tarefa: {DESCRIÇÃO COMPLETA DA TAREFA DO TASK_BOARD}
+
+Critérios de aceite (valide cada um antes de marcar como DONE):
+{LISTA COMPLETA DE CRITÉRIOS}
+
+Contexto de DECISIONS.md relevante para esta tarefa:
+{DECISÕES DE STACK, INFRA, CONFIGS QUE SE APLICAM}
+
+{SE HANDOFF EXISTIR:
+Contexto de HANDOFF.md — esta tarefa foi interrompida:
+{CONTEÚDO DO HANDOFF PARA ESTA TAREFA}
+}
+
+Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemente, atualize os docs ao concluir.
+")
+```
+
 ## Cenários especiais
 
 **Nenhuma tarefa disponível (todas as TODO têm dependências pendentes):**
@@ -94,8 +143,8 @@ Siga seu protocolo: leia os docs compartilhados, mova para IN_PROGRESS, implemen
 → Sugira: `/dev-team-status` para ver o quadro completo
 
 **Tarefa BLOCKED encontrada:**
-→ Exiba o motivo do bloqueio
-→ Sugira: invocar o tech-lead-agent diretamente para desbloquear
+→ O auto-desbloqueio já foi executado no início (ver seção acima)
+→ Se ainda houver BLOCKED após auto-desbloqueio: informe o motivo ao usuário
 
 **HANDOFF.md tem contexto desta tarefa:**
 → Inclua o conteúdo completo do HANDOFF no prompt do agente (já coberto acima)

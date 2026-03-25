@@ -39,6 +39,12 @@ O padrão de orquestração é: Command → Agent → Skill.
 ```
 .claude/
   agents/          ← definições dos subagentes
+    po-agent.md
+    tech-lead-agent.md
+    backend-agent.md
+    frontend-agent.md
+    qa-agent.md
+    devops-agent.md
   commands/        ← comandos /dev-team-*
   skills/
     shared-docs-reader/SKILL.md   ← leitura de contexto (pré-carregada nos agentes)
@@ -49,6 +55,8 @@ docs/
     DECISIONS.md
     HANDOFF.md
     PROGRESS.md
+tests/
+  test-doc-structure.sh           ← testes de integridade do orchestrator
 ```
 
 ## Comandos Disponíveis
@@ -58,6 +66,7 @@ docs/
 | `/dev-team-start` | Inicia o time com um PRD |
 | `/dev-team-next [TIPO\|ID]` | Executa a próxima tarefa disponível |
 | `/dev-team-review` | Roda o QA Agent nas tarefas concluídas |
+| `/dev-team-next-parallel` | Executa tarefas independentes em paralelo |
 | `/dev-team-status` | Mostra snapshot atual do projeto |
 
 ## Invocação de Subagentes

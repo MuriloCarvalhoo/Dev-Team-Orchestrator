@@ -2,15 +2,23 @@
   "permissions": {
     "allow": [
       "Read(*)",
-      "Write(docs/project-state/**)",
-      "Edit(docs/project-state/**)",
-      "Bash(npm test)",
-      "Bash(npm run test*)",
+      "Write(*)",
+      "Edit(*)",
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
       "Bash(pytest*)",
+      "Bash(python *)",
+      "Bash(pip *)",
       "Bash(ls*)",
       "Bash(cat*)",
       "Bash(grep*)",
-      "Bash(find*)"
+      "Bash(find*)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(git *)",
+      "Bash(bash tests/*)"
     ],
     "deny": []
   }

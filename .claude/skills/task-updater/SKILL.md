@@ -29,6 +29,11 @@ Abra `docs/project-state/TASK_BOARD.md` e:
 - Remova de `DONE`
 - Adicione em `## ✔️ VERIFIED` com a data
 
+**Se o QA encontrou bug e criou tarefa FIX-:**
+- Se bug CRÍTICO/ALTO: mova tarefa original de `DONE` de volta para `TODO`
+- Se bug MÉDIO/BAIXO: mova tarefa original para `VERIFIED`
+- A tarefa FIX-BACK-XXX ou FIX-FRONT-XXX já foi criada na seção TODO pelo QA
+
 ## 2. Atualizar PROGRESS.md
 
 Adicione no topo de `docs/project-state/PROGRESS.md`:

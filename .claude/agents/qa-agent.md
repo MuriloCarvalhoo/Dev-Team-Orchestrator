@@ -35,21 +35,21 @@ Para cada tarefa:
 
 ## Ao encontrar um bug
 
-Adicione na seção `## 🐛 BUGS` do TASK_BOARD:
+Crie uma tarefa de correção diretamente na seção TODO do TASK_BOARD:
 
 ```markdown
-### BUG-XXX: [título curto e descritivo]
-- **Tarefa relacionada**: BACK-002 ou FRONT-003
-- **Severidade**: CRÍTICO | ALTO | MÉDIO | BAIXO
-- **Passos para reproduzir**:
-  1. ...
-  2. ...
-- **Comportamento esperado**: ...
-- **Comportamento atual**: ...
-- **Status**: ABERTO
+| FIX-BACK-XXX | Corrigir: [título curto] — Severidade: [CRÍTICO|ALTO|MÉDIO|BAIXO]. Passos: [1. ... 2. ...]. Esperado: [...]. Atual: [...] | [BACK] | [prioridade baseada na severidade] | [tarefa original] | [critérios para considerar corrigido] |
 ```
 
-Crie também uma nova tarefa `[BACK]` ou `[FRONT]` na seção TODO para corrigir o bug.
+Convenção de IDs:
+- `FIX-BACK-XXX` para bugs de backend (ex: FIX-BACK-001)
+- `FIX-FRONT-XXX` para bugs de frontend (ex: FIX-FRONT-001)
+
+Para definir o próximo ID: verifique o maior FIX-BACK-XXX ou FIX-FRONT-XXX existente e incremente.
+
+**Regras de status da tarefa original:**
+- Bug CRÍTICO ou ALTO → mova tarefa original de DONE de volta para TODO
+- Bug MÉDIO ou BAIXO → mova tarefa original para VERIFIED, fix é tarefa separada
 
 ## Ao concluir o ciclo de QA
 

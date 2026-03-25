@@ -50,9 +50,6 @@ Se já existirem (projeto retomado), leia-os e pule para o PASSO 2.
 | ID | Descrição | Motivo do Bloqueio |
 |---|---|---|
 
-## 🐛 BUGS
-
-(bugs reportados pelo qa-agent)
 ```
 
 **`docs/project-state/DECISIONS.md`:**
@@ -103,7 +100,7 @@ Analise o PRD abaixo e crie todas as tarefas no TASK_BOARD.
 
 Siga seu protocolo completo:
 1. Leia o TASK_BOARD e DECISIONS existentes para não criar IDs duplicados
-2. Quebre o PRD em tarefas atômicas [BACK] e [FRONT] de 1-3h cada
+2. Quebre o PRD em tarefas atômicas [BACK], [FRONT] e [DEVOPS] de 1-3h cada
 3. Defina critérios de aceite verificáveis para cada tarefa
 4. Mapeie dependências entre tarefas
 5. Registre em DECISIONS.md as decisões que o PRD implica
@@ -129,7 +126,46 @@ Siga seu protocolo completo:
 ")
 ```
 
-### PASSO 4 — Apresente o resultado ao usuário
+### PASSO 3.5 — DevOps Agent faz scaffold do projeto
+
+```
+Agent(subagent_type="devops-agent", prompt="
+Setup inicial: o Tech Lead definiu a stack em DECISIONS.md.
+
+Siga seu protocolo de scaffold:
+1. Leia DECISIONS.md para saber a stack completa (linguagens, frameworks, versões)
+2. Crie a estrutura de pastas do projeto
+3. Crie arquivos de configuração (package.json, tsconfig, requirements.txt, etc.)
+4. Crie scripts de desenvolvimento (dev, build, test, lint)
+5. Crie .env.example com variáveis necessárias
+6. Instale dependências base
+7. Verifique que o projeto compila/roda sem erros
+8. Registre decisões de infra em DECISIONS.md (formato DEC-XXX)
+9. Adicione entrada em PROGRESS.md
+")
+```
+
+### PASSO 4 — PO Agent valida cobertura do PRD
+
+```
+Agent(subagent_type="po-agent", prompt="
+Validação de cobertura: verifique se TODAS as funcionalidades do PRD têm pelo menos uma tarefa correspondente no TASK_BOARD.
+
+1. Releia o PRD completo
+2. Para cada requisito/funcionalidade, verifique se existe tarefa que o cobre
+3. Se encontrar gap: crie a tarefa faltante no TASK_BOARD
+4. Reporte:
+   - Total de requisitos do PRD
+   - Total cobertos por tarefas
+   - Gaps encontrados e tarefas criadas para cobri-los
+   - Cobertura final (deve ser 100%)
+
+PRD:
+{CONTEÚDO_COMPLETO_DO_PRD}
+")
+```
+
+### PASSO 5 — Apresente o resultado ao usuário
 
 Leia os docs criados e mostre:
 

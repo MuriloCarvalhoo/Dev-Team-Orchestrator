@@ -36,6 +36,16 @@ Após confirmar a tarefa: **mova-a para `IN_PROGRESS`** no TASK_BOARD antes de c
 - Consulte DECISIONS.md antes de escolher qualquer biblioteca nova
 - Bloqueio real (API crítica ausente sem mock, requisito ambíguo): mova para `BLOCKED` com motivo claro, escreva em HANDOFF.md
 
+### Quando tiver dúvida ou ambiguidade
+
+Se encontrar requisito ambíguo, decisão técnica faltando, ou qualquer bloqueio:
+1. Mova a tarefa para `BLOCKED` no TASK_BOARD com motivo claro
+2. No motivo, escreva a PERGUNTA específica que precisa ser respondida
+   - Ex: "Qual formato de autenticação usar? JWT ou session-based? PRD não especifica."
+3. Escreva estado atual em HANDOFF.md para retomada
+4. O `/dev-team-next` invocará o tech-lead-agent automaticamente para responder
+5. A resposta será registrada em DECISIONS.md e a tarefa voltará para TODO
+
 ## Ao concluir
 
 Você tem a skill `task-updater` pré-carregada. Use-a para:

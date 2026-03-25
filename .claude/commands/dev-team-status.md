@@ -24,7 +24,7 @@ Não invoque nenhum agente — apenas leia e formate as informações.
 ✅ DONE:         {N} tarefas (aguardando QA)
 ✔️  VERIFIED:     {N} tarefas
 🚫 BLOCKED:      {N} tarefas
-🐛 BUGS ABERTOS: {N} ({W} críticos, {X} altos)
+🔧 FIX PENDENTES: {N} ({W} críticos, {X} altos)
 
 ─── EM ANDAMENTO ──────────────────────────
 {se houver}
@@ -45,11 +45,11 @@ Não invoque nenhum agente — apenas leia e formate as informações.
 {se vazio}
 • Nenhuma tarefa bloqueada
 
-─── BUGS ABERTOS ──────────────────────────
-{se houver}
-• BUG-{N} [{severidade}]: {título} → fix: {ID da tarefa de correção ou "sem tarefa criada"}
+─── TAREFAS DE FIX PENDENTES ──────────────
+{tarefas FIX-* no TODO ou IN_PROGRESS}
+• FIX-{TIPO}-{N} [{severidade}]: {título} (fix para: {ID original})
 {se vazio}
-• Nenhum bug aberto
+• Nenhuma correção pendente
 
 ─── STACK ─────────────────────────────────
 {extrair da tabela Stack em DECISIONS.md}
@@ -77,4 +77,4 @@ Baseado no estado atual, sugira o comando mais útil — apenas um:
 | Apenas BLOCKED e sem TODO disponível | Invocar `tech-lead-agent` diretamente |
 | IN_PROGRESS iniciada há muito tempo (>1 dia) | `/dev-team-next {ID}` para retomar via HANDOFF |
 | Tudo VERIFIED | "🎉 Sprint completo! Todos os critérios de aceite verificados." |
-| Bugs CRÍTICO abertos | `/dev-team-next` para corrigir o bug crítico primeiro |
+| FIX CRÍTICO pendente | `/dev-team-next` para corrigir o fix crítico primeiro |

@@ -64,12 +64,11 @@ Siga seu protocolo completo.
 ✔️  VERIFIED: {N} tarefa(s)
   {lista de IDs aprovados}
 
-🐛 BUGS encontrados: {N}
-  {ID bug} [{severidade}] — {título} (tarefa relacionada: {ID})
-  {ID bug} [{severidade}] — {título} (tarefa relacionada: {ID})
+🐛 Bugs encontrados: {N}
+  FIX-{TIPO}-{N} [{severidade}] — {título} (fix para: {ID original})
 
 📋 Tarefas de fix criadas: {N}
-  {lista de novos IDs para correção}
+  {lista de novos FIX-* IDs no TODO}
 ```
 
 **Próximo passo sugerido:**
