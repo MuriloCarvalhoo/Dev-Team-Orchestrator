@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Team Orchestrator — Workflow</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 2.5rem 0 1.2rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Architecture pattern ── */
+  .arch-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .arch-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.8rem;
+    text-align: center;
+    min-width: 160px;
+  }
+
+  .arch-box .label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 0.3rem;
+  }
+
+  .arch-box .name {
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .arch-arrow {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 48px;
+  }
+
+  .flow-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .flow-line {
+    width: 2px;
+    height: 40px;
+    background: var(--border);
+  }
+
+  .flow-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    flex: 1;
+    max-width: 900px;
+  }
+
+  .flow-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .flow-card p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .flow-card .agents-list {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .agent-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .badge-po { color: var(--purple); border-color: var(--purple); }
+  .badge-tl { color: var(--orange); border-color: var(--orange); }
+  .badge-devops { color: var(--cyan); border-color: var(--cyan); }
+  .badge-back { color: var(--green); border-color: var(--green); }
+  .badge-front { color: var(--pink); border-color: var(--pink); }
+  .badge-qa { color: var(--red); border-color: var(--red); }
+
+  .dot-po { background: var(--purple); }
+  .dot-tl { background: var(--orange); }
+  .dot-devops { background: var(--cyan); color: #000; }
+  .dot-back { background: var(--green); color: #000; }
+  .dot-front { background: var(--pink); color: #000; }
+  .dot-qa { background: var(--red); }
+  .dot-user { background: var(--accent); }
+  .dot-done { background: var(--green); color: #000; }
+
+  /* ── Task lifecycle ── */
+  .lifecycle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin: 1.5rem auto;
+    flex-wrap: wrap;
+    max-width: 900px;
+  }
+
+  .status-node {
+    padding: 0.8rem 1.4rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: center;
+    min-width: 120px;
+    border: 2px solid;
+  }
+
+  .status-todo { border-color: var(--text-muted); color: var(--text-muted); background: rgba(139,148,158,0.08); }
+  .status-progress { border-color: var(--accent); color: var(--accent); background: rgba(88,166,255,0.08); }
+  .status-done { border-color: var(--orange); color: var(--orange); background: rgba(210,153,34,0.08); }
+  .status-verified { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.08); }
+  .status-blocked { border-color: var(--red); color: var(--red); background: rgba(248,81,73,0.08); }
+
+  .lifecycle-arrow {
+    font-size: 1.3rem;
+    color: var(--text-muted);
+    padding: 0 0.5rem;
+  }
+
+  /* ── Blocked branch ── */
+  .blocked-branch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin: 0.8rem auto;
+    max-width: 600px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+  }
+
+  .blocked-branch .note {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+
+  /* ── Agent grid ── */
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+
+  .agent-card:hover {
+    border-color: var(--accent);
+  }
+
+  .agent-card h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .agent-card .role {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .agent-card .desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .agent-card .tools {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .agent-card .tools code {
+    background: rgba(88,166,255,0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  /* ── Testing pyramid ── */
+  .pyramid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 1.5rem auto;
+    max-width: 500px;
+  }
+
+  .pyramid-layer {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-align: center;
+    border: 1px solid;
+  }
+
+  .pyramid-e2e {
+    width: 50%;
+    border-color: var(--red);
+    color: var(--red);
+    background: rgba(248,81,73,0.08);
+  }
+
+  .pyramid-integration {
+    width: 70%;
+    border-color: var(--orange);
+    color: var(--orange);
+    background: rgba(210,153,34,0.08);
+  }
+
+  .pyramid-unit {
+    width: 90%;
+    border-color: var(--green);
+    color: var(--green);
+    background: rgba(63,185,80,0.08);
+  }
+
+  .pyramid-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+  }
+
+  /* ── Commands table ── */
+  .cmd-table {
+    width: 100%;
+    max-width: 800px;
+    margin: 1rem auto;
+    border-collapse: collapse;
+  }
+
+  .cmd-table th, .cmd-table td {
+    padding: 0.7rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.88rem;
+  }
+
+  .cmd-table th {
+    color: var(--text-muted);
+    font-weight: 500;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cmd-table code {
+    color: var(--accent);
+    font-weight: 600;
+    background: rgba(88,166,255,0.1);
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+  }
+
+  /* ── Skills ── */
+  .skills-row {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    max-width: 800px;
+    margin: 1rem auto;
+  }
+
+  .skill-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.3rem;
+    flex: 1;
+    min-width: 220px;
+    max-width: 260px;
+  }
+
+  .skill-card h4 {
+    font-size: 0.9rem;
+    color: var(--cyan);
+    margin-bottom: 0.3rem;
+  }
+
+  .skill-card p {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    body { padding: 1rem; }
+    .flow-card { padding: 0.8rem 1rem; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .lifecycle { gap: 0.3rem; }
+    .status-node { min-width: 90px; padding: 0.6rem 0.8rem; font-size: 0.8rem; }
+    .lifecycle-arrow { font-size: 1rem; padding: 0 0.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Dev Team Orchestrator</h1>
+<p class="subtitle">Fluxo de trabalho completo — Command &rarr; Agent &rarr; Skill</p>
+
+<!-- ════════════════════════════════════════ -->
+<!-- ARCHITECTURE PATTERN                     -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Padrao de Arquitetura</div>
+<div class="arch-row">
+  <div class="arch-box">
+    <div class="label">Camada 1</div>
+    <div class="name">Command</div>
+    <div class="label" style="margin-top:0.3rem">/dev-team-*</div>
+  </div>
+  <div class="arch-arrow">&rarr;</div>
+  <div class="arch-box">
+    <div class="label">Camada 2</div>
+    <div class="name">Agent</div>
+    <div class="label" style="margin-top:0.3rem">6 agentes especializados</div>
+  </div>
+  <div class="arch-arrow">&rarr;</div>
+  <div class="arch-box">
+    <div class="label">Camada 3</div>
+    <div class="name">Skill</div>
+    <div class="label" style="margin-top:0.3rem">task-reader, task-writer, board-scanner</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- MAIN FLOW                                -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Fluxo de Trabalho</div>
+<div class="flow">
+
+  <!-- Step 1: PRD -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-user">1</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Usuario fornece PRD</h3>
+      <p>Documento de requisitos do produto (PRD) e passado como argumento do comando de inicio.</p>
+    </div>
+  </div>
+
+  <!-- Step 2: /dev-team-start -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-po">2</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3><code>/dev-team-start</code></h3>
+      <p>Inicializa o projeto em 5 etapas sequenciais: cria estrutura <code>board/</code> e <code>docs/</code>, PO analisa PRD e cria tarefas atomicas (1-3h), Tech Lead define stack com versoes exatas, DevOps faz scaffold do projeto, PO injeta contexto tecnico em cada tarefa.</p>
+      <div class="agents-list">
+        <span class="agent-badge badge-po">PO Agent</span>
+        <span class="agent-badge badge-tl">Tech Lead</span>
+        <span class="agent-badge badge-devops">DevOps</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: dev-team-next OR dev-team-run -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-back">3</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3><code>/dev-team-next</code> ou <code>/dev-team-run</code></h3>
+      <p><strong>Manual:</strong> <code>/dev-team-next</code> seleciona e executa uma tarefa por vez (BACK antes de FRONT, HIGH &gt; MEDIUM &gt; LOW). Auto-desbloqueia tarefas BLOCKED via Tech Lead.<br>
+      <strong>Autonomo:</strong> <code>/dev-team-run</code> lanca tarefas independentes em paralelo usando worktrees isolados. Loop continuo ate tudo VERIFIED.</p>
+      <div class="agents-list">
+        <span class="agent-badge badge-back">Backend</span>
+        <span class="agent-badge badge-front">Frontend</span>
+        <span class="agent-badge badge-devops">DevOps</span>
+        <span class="agent-badge badge-tl">Tech Lead</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: Dev implementation -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-front">4</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Implementacao + Testes</h3>
+      <p>Cada agente dev le sua tarefa (<code>board/todo/{ID}.md</code>), move para <code>in_progress/</code>, implementa o codigo, escreve testes unitarios e de integracao, e move para <code>done/</code> ao concluir. Decisoes tecnicas novas sao registradas em <code>DECISIONS.md</code>.</p>
+      <div class="agents-list">
+        <span class="agent-badge badge-back">Backend</span>
+        <span class="agent-badge badge-front">Frontend</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: QA -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-qa">5</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>QA com Playwright E2E</h3>
+      <p>QA Agent valida cada tarefa em <code>done/</code>: roda testes unitarios e de integracao, escreve specs E2E com Playwright, captura screenshots por criterio de aceite. <strong>Screenshots sao a fonte de verdade.</strong></p>
+      <div class="agents-list">
+        <span class="agent-badge badge-qa">QA Agent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6: Verified -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-done">&check;</div>
+    </div>
+    <div class="flow-card">
+      <h3>Projeto Concluido</h3>
+      <p>Todas as tarefas em <code>board/verified/</code>. Se bugs forem encontrados, QA cria tarefas <code>FIX-*</code> que retornam ao ciclo. O loop do <code>/dev-team-run</code> repete ate zero tarefas pendentes.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TASK LIFECYCLE                            -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Ciclo de Vida da Tarefa</div>
+<div class="lifecycle">
+  <div class="status-node status-todo">todo/</div>
+  <div class="lifecycle-arrow">&rarr;</div>
+  <div class="status-node status-progress">in_progress/</div>
+  <div class="lifecycle-arrow">&rarr;</div>
+  <div class="status-node status-done">done/</div>
+  <div class="lifecycle-arrow">&rarr;</div>
+  <div class="status-node status-verified">verified/</div>
+</div>
+<div class="blocked-branch">
+  <div class="note">
+    <span class="status-node status-blocked" style="display:inline-block; min-width:auto; padding:0.3rem 0.8rem; font-size:0.8rem;">blocked/</span>
+    &nbsp;&larr; tarefa bloqueada &nbsp;|&nbsp; Tech Lead decide &rarr; volta para <strong>todo/</strong>
+    &nbsp;|&nbsp; QA encontra bug critico &rarr; <strong>done/</strong> volta para <strong>todo/</strong> como <code>FIX-*</code>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- AGENTS                                   -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Agentes</div>
+<div class="agent-grid">
+
+  <div class="agent-card">
+    <h4 style="color:var(--purple)">PO Agent</h4>
+    <div class="role">Product Owner</div>
+    <div class="desc">Analisa PRDs, cria tarefas atomicas com criterios de aceite testaveis, mapeia dependencias, injeta contexto tecnico.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Glob</code></div>
+  </div>
+
+  <div class="agent-card">
+    <h4 style="color:var(--orange)">Tech Lead</h4>
+    <div class="role">Arquiteto</div>
+    <div class="desc">Define stack com versoes exatas, resolve conflitos tecnicos, desbloqueia tarefas BLOCKED, registra decisoes em DECISIONS.md.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <h4 style="color:var(--green)">Backend Agent</h4>
+    <div class="role">Desenvolvedor Backend</div>
+    <div class="desc">Implementa tarefas [BACK]: APIs, logica de negocio, banco de dados, integracoes. Escreve testes unitarios e de integracao.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <h4 style="color:var(--pink)">Frontend Agent</h4>
+    <div class="role">Desenvolvedor Frontend</div>
+    <div class="desc">Implementa tarefas [FRONT]: componentes, telas, integracao com APIs. Sempre trata 3 estados: loading, error, empty.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <h4 style="color:var(--red)">QA Agent</h4>
+    <div class="role">QA Engineer</div>
+    <div class="desc">Valida tarefas DONE com 3 camadas: unit, integration, E2E Playwright. Screenshots sao prova de aceite. Cria tarefas FIX-* para bugs.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <h4 style="color:var(--cyan)">DevOps Agent</h4>
+    <div class="role">Infraestrutura</div>
+    <div class="desc">Scaffold do projeto: configs, dependencias, scripts, Playwright setup, Docker. Garante que o projeto roda sem erros.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- SKILLS                                   -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Skills</div>
+<div class="skills-row">
+  <div class="skill-card">
+    <h4>task-reader</h4>
+    <p>Le e parseia arquivo de tarefa <code>board/{status}/{ID}.md</code>. Extrai frontmatter, descricao, criterios, contexto e handoff.</p>
+  </div>
+  <div class="skill-card">
+    <h4>task-writer</h4>
+    <p>Atualiza tarefa e move entre pastas de status via <code>git mv</code>. Preenche Log, Handoff e PROGRESS.md.</p>
+  </div>
+  <div class="skill-card">
+    <h4>board-scanner</h4>
+    <p>Escaneia frontmatter de todos os arquivos do board. Resolve dependencias e ordena tarefas prontas.</p>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TESTING                                  -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Piramide de Testes</div>
+<div class="pyramid">
+  <div class="pyramid-layer pyramid-e2e">E2E Playwright + Screenshots</div>
+  <div class="pyramid-label">QA Agent &mdash; fonte de verdade para aceite</div>
+  <div class="pyramid-layer pyramid-integration">Integration Tests</div>
+  <div class="pyramid-label">Dev Agent &mdash; endpoints, queries, componentes</div>
+  <div class="pyramid-layer pyramid-unit">Unit Tests</div>
+  <div class="pyramid-label">Dev Agent &mdash; logica de negocio</div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- COMMANDS                                 -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Comandos</div>
+<table class="cmd-table">
+  <thead>
+    <tr>
+      <th>Comando</th>
+      <th>Descricao</th>
+      <th>Modo</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>/dev-team-start</code></td>
+      <td>Inicializa projeto a partir de um PRD: cria board, tarefas, define stack, scaffold</td>
+      <td>Sequencial</td>
+    </tr>
+    <tr>
+      <td><code>/dev-team-next</code></td>
+      <td>Seleciona e executa uma tarefa por vez, com auto-desbloqueio</td>
+      <td>Manual</td>
+    </tr>
+    <tr>
+      <td><code>/dev-team-run</code></td>
+      <td>Loop autonomo: tarefas em paralelo + QA ate tudo verified</td>
+      <td>Autonomo</td>
+    </tr>
+    <tr>
+      <td><code>/dev-team-status</code></td>
+      <td>Snapshot visual do board (read-only, sem agentes)</td>
+      <td>Read-only</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer">
+  Dev Team Orchestrator v3 &mdash; Multi-agent orchestration for Claude Code
+</div>
+
+</body>
+</html>
