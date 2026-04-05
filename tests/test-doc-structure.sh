@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Integration tests for Dev Team Orchestrator
-# Validates structure of docs, agents, commands, and skills
+# Integration tests for Dev Team Orchestrator v2
+# Validates structure of board/, agents, commands, skills, and docs
 set -euo pipefail
 
 PASS=0
@@ -17,7 +17,7 @@ check() {
   fi
 }
 
-echo "=== Dev Team Orchestrator — Integration Tests ==="
+echo "=== Dev Team Orchestrator v2 — Integration Tests ==="
 echo ""
 
 # --- Agent validation ---
@@ -36,6 +36,10 @@ for agent in "$PROJECT_ROOT"/.claude/agents/*.md; do
   for skill in $skills; do
     check "$name skill '$skill' exists" "test -f '$PROJECT_ROOT/.claude/skills/$skill/SKILL.md'"
   done
+
+  # Should NOT reference old skills
+  check "$name does NOT reference shared-docs-reader" "! grep -q 'shared-docs-reader' '$agent'"
+  check "$name does NOT reference task-updater" "! grep -q 'task-updater' '$agent'"
 done
 
 echo ""
@@ -51,6 +55,10 @@ for cmd in "$PROJECT_ROOT"/.claude/commands/*.md; do
   for ref in $agents_referenced; do
     check "$name references existing agent '$ref'" "test -f '$PROJECT_ROOT/.claude/agents/$ref.md'"
   done
+
+  # Should NOT reference old paths
+  check "$name does NOT reference docs/project-state/" "! grep -q 'docs/project-state/' '$cmd'"
+  check "$name does NOT reference TASK_BOARD.md" "! grep -q 'TASK_BOARD.md' '$cmd'"
 done
 
 echo ""
@@ -64,31 +72,66 @@ for skill_dir in "$PROJECT_ROOT"/.claude/skills/*/; do
   check "Skill '$skill_name' has 'name:' field" "head -10 '$skill_dir/SKILL.md' | grep -q '^name:'"
 done
 
+# Required skills exist
+check "task-reader skill exists" "test -f '$PROJECT_ROOT/.claude/skills/task-reader/SKILL.md'"
+check "task-writer skill exists" "test -f '$PROJECT_ROOT/.claude/skills/task-writer/SKILL.md'"
+check "board-scanner skill exists" "test -f '$PROJECT_ROOT/.claude/skills/board-scanner/SKILL.md'"
+
+# Old skills removed
+check "shared-docs-reader skill removed" "! test -d '$PROJECT_ROOT/.claude/skills/shared-docs-reader'"
+check "task-updater skill removed" "! test -d '$PROJECT_ROOT/.claude/skills/task-updater'"
+
 echo ""
 
-# --- Doc structure validation (only if docs exist) ---
-if [ -d "$PROJECT_ROOT/docs/project-state" ]; then
-  echo "--- Doc Structure ---"
+# --- Board structure validation (only if board/ exists) ---
+if [ -d "$PROJECT_ROOT/board" ]; then
+  echo "--- Board Structure ---"
 
-  TB="$PROJECT_ROOT/docs/project-state/TASK_BOARD.md"
-  if [ -f "$TB" ]; then
-    check "TASK_BOARD has TODO section" "grep -q '## 📋 TODO' '$TB'"
-    check "TASK_BOARD has IN_PROGRESS section" "grep -q '## 🔄 IN_PROGRESS' '$TB'"
-    check "TASK_BOARD has DONE section" "grep -q '## ✅ DONE' '$TB'"
-    check "TASK_BOARD has VERIFIED section" "grep -q '## ✔️ VERIFIED' '$TB'"
-    check "TASK_BOARD has BLOCKED section" "grep -q '## 🚫 BLOCKED' '$TB'"
-  fi
+  check "board/todo/ exists" "test -d '$PROJECT_ROOT/board/todo'"
+  check "board/in_progress/ exists" "test -d '$PROJECT_ROOT/board/in_progress'"
+  check "board/done/ exists" "test -d '$PROJECT_ROOT/board/done'"
+  check "board/verified/ exists" "test -d '$PROJECT_ROOT/board/verified'"
+  check "board/blocked/ exists" "test -d '$PROJECT_ROOT/board/blocked'"
 
-  DEC="$PROJECT_ROOT/docs/project-state/DECISIONS.md"
-  if [ -f "$DEC" ]; then
-    check "DECISIONS has Stack section" "grep -q '## Stack' '$DEC'"
-  fi
-
-  check "HANDOFF.md exists" "test -f '$PROJECT_ROOT/docs/project-state/HANDOFF.md'"
-  check "PROGRESS.md exists" "test -f '$PROJECT_ROOT/docs/project-state/PROGRESS.md'"
+  # Validate task file format (if any exist)
+  for task in "$PROJECT_ROOT"/board/*/*.md; do
+    [ -f "$task" ] || continue
+    task_name=$(basename "$task" .md)
+    check "$task_name has 'id:' in frontmatter" "head -10 '$task' | grep -q '^id:'"
+    check "$task_name has 'type:' in frontmatter" "head -10 '$task' | grep -q '^type:'"
+    check "$task_name has 'priority:' in frontmatter" "head -10 '$task' | grep -q '^priority:'"
+    check "$task_name has 'depends_on:' in frontmatter" "head -10 '$task' | grep -q '^depends_on:'"
+    check "$task_name has NO 'status:' in frontmatter" "! head -10 '$task' | grep -q '^status:'"
+  done
 
   echo ""
 fi
+
+# --- Docs validation ---
+echo "--- Docs ---"
+
+if [ -f "$PROJECT_ROOT/docs/DECISIONS.md" ]; then
+  check "DECISIONS has Stack section" "grep -q '## Stack' '$PROJECT_ROOT/docs/DECISIONS.md'"
+fi
+
+# Old docs should not exist
+check "docs/project-state/ does NOT exist" "! test -d '$PROJECT_ROOT/docs/project-state'"
+
+echo ""
+
+# --- Required commands exist ---
+echo "--- Required Commands ---"
+
+check "dev-team-start command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-start.md'"
+check "dev-team-next command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-next.md'"
+check "dev-team-run command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-run.md'"
+check "dev-team-status command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-status.md'"
+
+# Old commands removed
+check "dev-team-next-parallel removed" "! test -f '$PROJECT_ROOT/.claude/commands/dev-team-next-parallel.md'"
+check "dev-team-review removed" "! test -f '$PROJECT_ROOT/.claude/commands/dev-team-review.md'"
+
+echo ""
 
 # --- Settings validation ---
 echo "--- Settings ---"

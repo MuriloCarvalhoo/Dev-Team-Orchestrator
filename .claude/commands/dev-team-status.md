@@ -1,6 +1,6 @@
 # /dev-team-status
 
-Exibe um snapshot completo do estado atual do projeto.
+Exibe um snapshot completo do estado atual do projeto baseado na estrutura `board/`.
 
 ## Uso
 
@@ -8,73 +8,80 @@ Exibe um snapshot completo do estado atual do projeto.
 /dev-team-status
 ```
 
-## Execução
+## Execucao
 
-Leia os 4 docs compartilhados em `docs/project-state/` e exiba o relatório abaixo.
-Não invoque nenhum agente — apenas leia e formate as informações.
+Liste os arquivos em cada subpasta de `board/` e leia frontmatter de cada um.
+Leia `docs/DECISIONS.md` para a stack.
+Leia as ultimas 5 linhas de `docs/PROGRESS.md` para atividade recente.
+Nao invoque nenhum agente — apenas leia e formate.
 
-## Formato do relatório
+## Formato do relatorio
 
 ```
-📊 STATUS DO PROJETO — {DATA E HORA}
-═══════════════════════════════════════════
+STATUS DO PROJETO — {DATA E HORA}
+=======================================
 
-📋 TODO:         {N} tarefas ({X} disponíveis agora, {Y} aguardando dependências)
-🔄 IN_PROGRESS:  {N} tarefas
-✅ DONE:         {N} tarefas (aguardando QA)
-✔️  VERIFIED:     {N} tarefas
-🚫 BLOCKED:      {N} tarefas
-🔧 FIX PENDENTES: {N} ({W} críticos, {X} altos)
+board/todo/         {N} tarefas ({X} disponiveis agora, {Y} aguardando deps)
+board/in_progress/  {N} tarefas
+board/done/         {N} tarefas (aguardando QA)
+board/verified/     {N} tarefas
+board/blocked/      {N} tarefas
+FIX pendentes:      {N} ({W} criticos, {X} altos)
 
-─── EM ANDAMENTO ──────────────────────────
-{se houver}
-• {ID}: {descrição} (iniciado em {data})
+--- EM ANDAMENTO --------------------------
+{listar arquivos em board/in_progress/ com ID e titulo}
+- {ID}: {titulo} (assigned: {agent})
 {se vazio}
-• Nenhuma tarefa em andamento
+- Nenhuma tarefa em andamento
 
-─── PRÓXIMAS DISPONÍVEIS ──────────────────
-{tarefas TODO cujas dependências estão DONE/VERIFIED, em ordem de prioridade}
-1. {ID} [{BACK|FRONT}] [{prioridade}]: {descrição}
-2. {ID} [{BACK|FRONT}] [{prioridade}]: {descrição}
+--- PRONTAS PARA EXECUTAR -----------------
+{tarefas em board/todo/ cujas deps estao em done/ ou verified/}
+1. {ID} [{BACK|FRONT}] [{prioridade}]: {titulo}
+2. {ID} [{BACK|FRONT}] [{prioridade}]: {titulo}
 {se vazio}
-• Nenhuma tarefa disponível — todas aguardam dependências
+- Nenhuma tarefa disponivel — todas aguardam dependencias
 
-─── BLOQUEADAS ────────────────────────────
-{se houver}
-• {ID}: {motivo do bloqueio}
+--- AGUARDANDO QA -------------------------
+{listar arquivos em board/done/}
+- {ID}: {titulo}
 {se vazio}
-• Nenhuma tarefa bloqueada
+- Nenhuma tarefa aguardando QA
 
-─── TAREFAS DE FIX PENDENTES ──────────────
-{tarefas FIX-* no TODO ou IN_PROGRESS}
-• FIX-{TIPO}-{N} [{severidade}]: {título} (fix para: {ID original})
+--- BLOQUEADAS ----------------------------
+{listar arquivos em board/blocked/ com motivo do Handoff}
+- {ID}: {motivo}
 {se vazio}
-• Nenhuma correção pendente
+- Nenhuma tarefa bloqueada
 
-─── STACK ─────────────────────────────────
-{extrair da tabela Stack em DECISIONS.md}
-Backend:  {tecnologia} {versão}
-Frontend: {tecnologia} {versão}
-Banco:    {tecnologia} {versão}
-Testes:   {tecnologia} {versão}
+--- FIX PENDENTES -------------------------
+{tarefas FIX-* em board/todo/ ou board/in_progress/}
+- {ID} [{severidade}]: {titulo}
+{se vazio}
+- Nenhuma correcao pendente
 
-─── PROGRESSO GERAL ───────────────────────
+--- STACK ---------------------------------
+{extrair da tabela Stack em docs/DECISIONS.md}
+Backend:    {tecnologia} {versao}
+Frontend:   {tecnologia} {versao}
+Banco:      {tecnologia} {versao}
+Unit Tests: {tecnologia}
+Integration:{tecnologia}
+E2E:        Playwright
+
+--- PROGRESSO GERAL -----------------------
 VERIFIED: {N} de {TOTAL} tarefas ({%}%)
-[████████░░░░░░░░░░░░] {%}%
+[====================] {%}%
 
-─── ÚLTIMA ATIVIDADE ──────────────────────
-{primeiras 3 entradas de PROGRESS.md — data e descrição curta}
+--- ULTIMA ATIVIDADE ----------------------
+{ultimas 5 linhas de docs/PROGRESS.md}
 ```
 
-## Sugestão de próximo passo
+## Sugestao de proximo passo
 
-Baseado no estado atual, sugira o comando mais útil — apenas um:
-
-| Situação | Sugestão |
+| Situacao | Sugestao |
 |---|---|
-| Tarefas TODO disponíveis | `/dev-team-next` |
-| Tarefas DONE sem QA | `/dev-team-review` (mencione quantas) |
-| Apenas BLOCKED e sem TODO disponível | Invocar `tech-lead-agent` diretamente |
-| IN_PROGRESS iniciada há muito tempo (>1 dia) | `/dev-team-next {ID}` para retomar via HANDOFF |
-| Tudo VERIFIED | "🎉 Sprint completo! Todos os critérios de aceite verificados." |
-| FIX CRÍTICO pendente | `/dev-team-next` para corrigir o fix crítico primeiro |
+| Tarefas em board/todo/ disponiveis | `/dev-team-next` ou `/dev-team-run` |
+| Tarefas em board/done/ | `/dev-team-run` (inclui QA automatico) |
+| Apenas blocked/ e sem todo/ disponivel | Resolver bloqueio manualmente |
+| Tudo em board/verified/ | "Projeto completo!" |
+| FIX CRITICO em board/todo/ | `/dev-team-next {FIX-ID}` |
