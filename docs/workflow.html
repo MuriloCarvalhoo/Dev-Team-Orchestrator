@@ -159,6 +159,48 @@
     flex-wrap: wrap;
   }
 
+  .flow-card ol.substeps {
+    margin: 0.7rem 0 0.7rem 1.3rem;
+    padding: 0;
+  }
+
+  .flow-card ol.substeps li {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+
+  .flow-card ol.substeps li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .flow-card .note-box {
+    margin-top: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    background: rgba(88,166,255,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .flow-card .note-box.warn {
+    background: rgba(210,153,34,0.08);
+    border-left-color: var(--orange);
+  }
+
+  .flow-card .note-box.danger {
+    background: rgba(248,81,73,0.08);
+    border-left-color: var(--red);
+  }
+
+  .flow-card .note-box strong {
+    color: var(--text);
+  }
+
   .agent-badge {
     font-size: 0.75rem;
     padding: 0.2rem 0.6rem;
@@ -236,6 +278,55 @@
     font-size: 0.82rem;
     color: var(--text-muted);
     text-align: center;
+  }
+
+  /* ── Parallel coordination grid ── */
+  .parallel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .parallel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+  }
+
+  .parallel-card h4 {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .parallel-card p, .parallel-card li {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .parallel-card ol, .parallel-card ul {
+    margin: 0.4rem 0 0 1.1rem;
+    padding: 0;
+  }
+
+  .parallel-card ol li, .parallel-card ul li {
+    margin-bottom: 0.35rem;
+  }
+
+  .parallel-card code {
+    background: rgba(88,166,255,0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  .parallel-card strong {
+    color: var(--text);
   }
 
   /* ── Agent grid ── */
@@ -467,82 +558,71 @@
     </div>
   </div>
 
-  <!-- Step 2: Wireframes -->
+  <!-- Step 2: /dev-team-start (orquestracao inicial) -->
   <div class="flow-step">
     <div class="flow-connector">
       <div class="flow-dot dot-po">2</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
-      <h3>Wireframes (PO + Tech Lead + Gate Usuario)</h3>
-      <p>PO Agent cria <code>docs/wireframes/{nome}.html</code> por tela em HTML puro (sem CSS) cobrindo todas as funcionalidades do PRD. Tech Lead revisa cobertura e consistencia. <strong>Execucao pausa</strong> e o usuario aprova manualmente o indice antes de prosseguir. Feedback do usuario reabre o ciclo (max 3 iteracoes).</p>
+      <h3><code>/dev-team-start</code> &mdash; orquestracao inicial (10 etapas)</h3>
+      <p>Comando <strong>sequencial</strong> que prepara tudo antes do ciclo autonomo. Cada sub-etapa e executada em ordem; a unica pausa e o gate de aprovacao de wireframes.</p>
+      <ol class="substeps">
+        <li><strong>Cria estrutura</strong> de <code>board/</code>, <code>docs/</code>, <code>tests/</code> e inicializa <code>DECISIONS.md</code> + <code>PROGRESS.md</code>.</li>
+        <li><strong>PO gera wireframes</strong> em <code>docs/wireframes/{nome}.html</code> &mdash; HTML puro sem CSS, cobrindo todas as funcionalidades do PRD, com botoes/inputs nomeados e estados (loading/erro/vazio/sucesso) declarados.</li>
+        <li><strong>Tech Lead revisa</strong> cobertura e consistencia dos wireframes contra o PRD.</li>
+        <li><strong>Gate do usuario</strong>: execucao pausa, usuario aprova manualmente o <code>docs/wireframes/index.html</code>. Feedback reabre o ciclo (<strong>max 3 iteracoes</strong>). Se rejeitado na 3<sup>a</sup>, Tech Lead registra <code>DEC-TL-XXX</code> com as ressalvas e decide: <em>abortar</em> ou <em>prosseguir com escopo reduzido</em>.</li>
+        <li><strong>Tech Lead define stack</strong> com versoes exatas (backend, frontend, banco, runners de teste) e registra em <code>DECISIONS.md</code>.</li>
+        <li><strong>Tech Lead gera contratos</strong> em <code>docs/contracts/{nome}.md</code> &mdash; UM arquivo por feature com secoes <code>## API</code> (endpoints, schemas, erros) e <code>## Screen</code> (componentes, eventos, estados, validacoes). Schemas sao concretos em TypeScript inline. Decisoes nao-triviais (auth, paginacao, status codes) viram <code>DEC-TL-XXX</code> em <code>DECISIONS.md</code>.</li>
+        <li><strong>PO cria tarefas</strong> em <code>board/todo/</code> referenciando contratos pelo slug (ex: <code>BACK-003: login</code> aponta para <code>docs/contracts/login.md</code>).</li>
+        <li><strong>DevOps faz scaffold</strong>: configs, dependencias, scripts, Playwright setup, Docker &mdash; garante que o projeto roda sem erros.</li>
+        <li><strong>PO injeta contexto</strong> tecnico em cada tarefa (paths, dependencias, referencias cruzadas).</li>
+        <li><strong>Board pronto</strong> &mdash; usuario pode rodar <code>/dev-team-run</code>.</li>
+      </ol>
+      <div class="note-box">
+        <strong>Reconciliacao wireframe &harr; stack:</strong> wireframes sao agnosticos de stack. Se a stack escolhida na etapa 5 invalidar uma suposicao implicita do wireframe (ex: wireframe assume push em tempo real mas stack nao tem WebSocket), Tech Lead abre mini-loop de wireframe (volta para etapa 2) com um <code>DEC-TL-XXX</code> justificando.
+      </div>
       <div class="agents-list">
         <span class="agent-badge badge-po">PO Agent</span>
         <span class="agent-badge badge-tl">Tech Lead</span>
+        <span class="agent-badge badge-devops">DevOps</span>
         <span class="agent-badge" style="color:var(--accent); border-color:var(--accent)">Usuario</span>
       </div>
     </div>
   </div>
 
-  <!-- Step 3: Contratos -->
+  <!-- Step 3: /dev-team-run -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-tl">3</div>
+      <div class="flow-dot dot-back">3</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
-      <h3>Contratos por feature (Tech Lead)</h3>
-      <p>Apos os wireframes aprovados e a stack definida, Tech Lead cria <code>docs/contracts/{nome}.md</code> — UM arquivo por feature com secoes <code>## API</code> (endpoints, schemas, erros) e <code>## Screen</code> (componentes, eventos, estados, validacoes). Schemas sao concretos. Decisoes nao-triviais (auth, paginacao, status codes) viram <code>DEC-TL-XXX</code> em DECISIONS.md.</p>
-      <div class="agents-list">
-        <span class="agent-badge badge-tl">Tech Lead</span>
+      <h3><code>/dev-team-run</code> &mdash; loop autonomo</h3>
+      <p><strong>Autonomo:</strong> lanca tarefas independentes em paralelo usando worktrees isolados. A cada iteracao, <code>board-scanner</code> resolve dependencias (<code>depends_on</code>) e ordena as tarefas prontas por <code>priority DESC, created ASC</code>. Loop continuo ate tudo em <code>verified/</code>.</p>
+      <div class="note-box warn">
+        <strong>Circuit breaker:</strong> cada tarefa original tem orcamento de ate <strong>3 ciclos de FIX-*</strong>. Na 4<sup>a</sup> falha, a tarefa vai para <code>blocked/</code> com flag <code>needs_user</code> e o loop continua com as demais. Tech Lead tenta desbloquear; se nao conseguir, escala para o usuario.
       </div>
-    </div>
-  </div>
-
-  <!-- Step 4: /dev-team-start -->
-  <div class="flow-step">
-    <div class="flow-connector">
-      <div class="flow-dot dot-po">4</div>
-      <div class="flow-line"></div>
-    </div>
-    <div class="flow-card">
-      <h3><code>/dev-team-start</code> &mdash; criacao de tarefas</h3>
-      <p>O comando orquestra 10 etapas no total: cria estrutura, gera wireframes, revisa, gate do usuario, define stack, gera contratos, PO cria tarefas em <code>board/todo/</code> referenciando contratos pelo slug (ex: <code>BACK-003: login</code> aponta para <code>docs/contracts/login.md</code>), DevOps faz scaffold, PO injeta contexto.</p>
-      <div class="agents-list">
-        <span class="agent-badge badge-po">PO Agent</span>
-        <span class="agent-badge badge-tl">Tech Lead</span>
-        <span class="agent-badge badge-devops">DevOps</span>
-      </div>
-    </div>
-  </div>
-
-  <!-- Step 5: /dev-team-run -->
-  <div class="flow-step">
-    <div class="flow-connector">
-      <div class="flow-dot dot-back">5</div>
-      <div class="flow-line"></div>
-    </div>
-    <div class="flow-card">
-      <h3><code>/dev-team-run</code></h3>
-      <p><strong>Autonomo:</strong> <code>/dev-team-run</code> lanca tarefas independentes em paralelo usando worktrees isolados. Loop continuo ate tudo VERIFIED.</p>
       <div class="agents-list">
         <span class="agent-badge badge-back">Backend</span>
         <span class="agent-badge badge-front">Frontend</span>
         <span class="agent-badge badge-devops">DevOps</span>
-        <span class="agent-badge badge-tl">Tech Lead</span>
       </div>
     </div>
   </div>
 
-  <!-- Step 6: Dev implementation -->
+  <!-- Step 4: Dev implementation -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-front">6</div>
+      <div class="flow-dot dot-front">4</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
-      <h3>Implementacao + Testes</h3>
-      <p>Cada agente dev le sua tarefa (<code>board/todo/{ID}.md</code>) e o contrato apontado no Context, move para <code>in_progress/</code>, implementa o codigo seguindo o contrato (schemas e eventos sao a fonte de verdade), escreve testes unitarios e de integracao, e move para <code>done/</code> ao concluir. Decisoes tecnicas novas sao registradas em <code>DECISIONS.md</code>.</p>
+      <h3>Implementacao + Testes (Dev)</h3>
+      <p>Cada agente dev le sua tarefa (<code>board/todo/{ID}.md</code>) e o contrato apontado no Context, move para <code>in_progress/</code>, implementa o codigo seguindo o contrato (schemas e eventos sao fonte de verdade), <strong>escreve e roda</strong> testes unitarios e de integracao e move para <code>done/</code> ao concluir. Decisoes tecnicas novas sao registradas em <code>DECISIONS.md</code>.</p>
+      <div class="note-box warn">
+        <strong>Falha persistente de teste ou ambiguidade de contrato:</strong> se o agente nao resolve apos tentativas razoaveis, move para <code>blocked/</code> com <code>reason</code> preenchido no Handoff. Tech Lead assume; se nao conseguir, escala para usuario.
+      </div>
       <div class="agents-list">
         <span class="agent-badge badge-back">Backend</span>
         <span class="agent-badge badge-front">Frontend</span>
@@ -550,29 +630,32 @@
     </div>
   </div>
 
-  <!-- Step 7: QA -->
+  <!-- Step 5: QA -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-qa">7</div>
+      <div class="flow-dot dot-qa">5</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
       <h3>QA com Playwright E2E</h3>
-      <p>QA Agent valida cada tarefa em <code>done/</code>: roda testes unitarios e de integracao, escreve specs E2E com Playwright (1 spec por criterio de aceite, <code>getByRole</code>/<code>getByLabel</code>, sem <code>waitForTimeout</code>), captura screenshots por criterio. <strong>Screenshots sao a fonte de verdade.</strong></p>
+      <p>QA Agent valida cada tarefa em <code>done/</code>: re-executa unit/integration (do Dev), escreve specs E2E com Playwright (1 spec por criterio de aceite, <code>getByRole</code>/<code>getByLabel</code>, sem <code>waitForTimeout</code>), captura screenshots por criterio. <strong>Screenshots sao a fonte de verdade.</strong></p>
+      <div class="note-box danger">
+        <strong>Bug critico = tarefa nao passa:</strong> (a) AC sem screenshot correspondente, (b) E2E vermelho, (c) screenshot nao confirma o AC, (d) unit/integration quebrando em re-run. Qualquer um &rarr; QA cria tarefa nova <code>FIX-{ID}-N</code> em <code>board/todo/</code> apontando para a tarefa original; a original vai para <code>verified/</code> com flag <code>has_fix</code>. <em>Nao</em> se move a tarefa original de volta.
+      </div>
       <div class="agents-list">
         <span class="agent-badge badge-qa">QA Agent</span>
       </div>
     </div>
   </div>
 
-  <!-- Step 8: Verified -->
+  <!-- Step 6: Verified -->
   <div class="flow-step">
     <div class="flow-connector">
       <div class="flow-dot dot-done">&check;</div>
     </div>
     <div class="flow-card">
       <h3>Projeto Concluido</h3>
-      <p>Todas as tarefas em <code>board/verified/</code>. Se bugs forem encontrados, QA cria tarefas <code>FIX-*</code> que retornam ao ciclo. O loop do <code>/dev-team-run</code> repete ate zero tarefas pendentes.</p>
+      <p>Todas as tarefas em <code>board/verified/</code> e nenhuma <code>FIX-*</code> pendente. Apos o ultimo merge, QA roda um <strong>smoke test de sistema inteiro</strong>: sobe o stack completo, executa um E2E minimo que cobre o fluxo principal ponta a ponta. Sucesso &rarr; projeto entregue.</p>
     </div>
   </div>
 
@@ -600,17 +683,94 @@
 </div>
 
 <!-- ════════════════════════════════════════ -->
+<!-- PARALLELISM & MERGE STRATEGY             -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Paralelismo &amp; Merge</div>
+<p style="text-align:center; color:var(--text-muted); font-size:0.88rem; max-width:800px; margin:0 auto 1.5rem;">
+  Como <code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">/dev-team-run</code> coordena varias tarefas em paralelo sem corromper o board nem perder trabalho.
+</p>
+<div class="parallel-grid">
+
+  <div class="parallel-card">
+    <h4>Ciclo de vida do worktree</h4>
+    <ol>
+      <li><code>/dev-team-run</code> cria um <code>git worktree</code> por tarefa paralela, em branch <code>task/{ID}</code> a partir de <code>main</code>.</li>
+      <li>Dev agent trabalha isolado: implementa, roda unit/integration, move o arquivo via <code>git mv</code> dentro do worktree.</li>
+      <li>Ao mover para <code>done/</code>, agent faz <code>git fetch</code> + <code>git rebase main</code>, resolve conflitos e faz <strong>merge squash no <code>main</code></strong>.</li>
+      <li>Worktree e removido apos merge. QA opera no <code>main</code>, nunca em worktree.</li>
+    </ol>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Board vive no <code>main</code></h4>
+    <p>O board (<code>todo/</code>, <code>in_progress/</code>, <code>done/</code>, <code>verified/</code>, <code>blocked/</code>) e fonte unica e mora sempre no branch <code>main</code>. Mudancas dentro de um worktree so ficam visiveis depois do merge.</p>
+    <p style="margin-top:0.5rem;"><code>/dev-team-status</code> e <code>board-scanner</code> <strong>sempre leem o <code>main</code></strong>, nunca agregam worktrees ativos.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Arquivos append-only (merge automatico)</h4>
+    <p>Os arquivos abaixo sao escritos por multiplos agentes em paralelo e usam driver de merge <code>union</code> configurado em <code>.gitattributes</code>, o que junta linhas sem conflito:</p>
+    <ul>
+      <li><code>docs/DECISIONS.md</code></li>
+      <li><code>docs/PROGRESS.md</code></li>
+    </ul>
+    <p style="margin-top:0.5rem;">Entradas em <code>DECISIONS.md</code> sao sempre anexadas ao fim com <code>DEC-{AGENT}-{NNN}</code> unico.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Arquivos estruturais (serializacao)</h4>
+    <p>Exigem rebase + resolucao manual:</p>
+    <ul>
+      <li><code>package.json</code>, <code>tsconfig.json</code>, <code>vite.config.ts</code> (configs)</li>
+      <li><code>docs/contracts/*.md</code> (fonte de verdade de API/Screen)</li>
+      <li>Arquivos de codigo em paths compartilhados</li>
+    </ul>
+    <p style="margin-top:0.5rem;">Conflito nao resolvivel pelo agent &rarr; tarefa vai para <code>blocked/</code> com <code>reason: merge_conflict</code>. Tech Lead assume.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Contratos sao imutaveis durante o run</h4>
+    <p>Apos <code>/dev-team-start</code>, os contratos em <code>docs/contracts/</code> sao <strong>congelados</strong>. Se um dev descobrir que precisa alterar um contrato, a tarefa vai para <code>blocked/</code> com <code>reason: contract_change</code>. Tech Lead atualiza o contrato, registra <code>DEC-TL-XXX</code> e todas as tarefas dependentes sao re-validadas.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Limite de paralelismo</h4>
+    <p><code>/dev-team-run</code> respeita um teto configuravel (default: 3 worktrees simultaneos) para evitar explosao de conflitos e exaustao de recursos (dev servers, portas, DB schemas para Playwright).</p>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
 <!-- DESIGN ARTIFACTS                         -->
 <!-- ════════════════════════════════════════ -->
 <div class="section-title">Artefatos de Design</div>
-<div class="skills-row">
-  <div class="skill-card">
+<div class="parallel-grid">
+  <div class="parallel-card">
     <h4>docs/wireframes/</h4>
-    <p>Um arquivo HTML por tela, sem CSS, com botoes/inputs nomeados e estados (loading/erro/vazio/sucesso) declarados. Aprovados pelo usuario antes de qualquer tarefa ser criada.</p>
+    <p>Um arquivo HTML por tela, sem CSS, com botoes/inputs nomeados e estados (<em>loading / erro / vazio / sucesso</em>) declarados. Aprovados pelo usuario antes de qualquer tarefa ser criada.</p>
+    <p style="margin-top:0.5rem;"><strong>Escopo da aprovacao:</strong> validam <em>estrutura, elementos e estados</em>, <strong>nao</strong> estetica/layout visual. Estetica e implementada pelo frontend na etapa de Dev (Step 4) e validada por screenshots do QA.</p>
   </div>
-  <div class="skill-card">
+
+  <div class="parallel-card">
     <h4>docs/contracts/</h4>
-    <p>Um <code>{nome}.md</code> por feature com secoes <code>## API</code> e <code>## Screen</code>. Fonte de verdade compartilhada — backend e frontend implementam contra o mesmo arquivo, referenciado pelo slug no titulo da tarefa.</p>
+    <p>Um <code>{nome}.md</code> por feature com duas secoes fixas:</p>
+    <ul>
+      <li><code>## API</code> &mdash; endpoints, request/response schemas, codigos de erro.</li>
+      <li><code>## Screen</code> &mdash; componentes, eventos, estados, validacoes.</li>
+    </ul>
+    <p style="margin-top:0.5rem;"><strong>Formato de schema:</strong> TypeScript <code>interface</code>/<code>type</code> inline, acompanhados de um exemplo JSON de request e response. Sem OpenAPI, sem JSON Schema &mdash; padronizado para evitar drift entre features.</p>
+    <p style="margin-top:0.5rem;">Backend e frontend implementam contra o <strong>mesmo</strong> arquivo, referenciado pelo slug no titulo da tarefa (ex: <code>BACK-003: login</code> &rarr; <code>docs/contracts/login.md</code>). Contratos sao <strong>imutaveis</strong> apos <code>/dev-team-start</code> (ver "Paralelismo &amp; Merge").</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>docs/DECISIONS.md</h4>
+    <p>Registro append-only de decisoes tecnicas no formato <code>DEC-{AGENT}-{NNN}</code>. Cada entrada tem: titulo, contexto, opcoes consideradas, decisao, consequencia.</p>
+    <p style="margin-top:0.5rem;"><strong>Fronteira vs contratos:</strong></p>
+    <ul>
+      <li><em>Contratos</em>: <strong>o que</strong> a interface expoe (schema do endpoint de login).</li>
+      <li><em>DECISIONS</em>: <strong>por que</strong> aquela escolha (por que JWT em vez de sessao, por que paginacao por cursor).</li>
+    </ul>
+    <p style="margin-top:0.5rem;">Se uma decisao muda o contrato, ela aparece nos dois: entrada em DECISIONS + atualizacao do contrato (via <code>blocked/ &rarr; Tech Lead</code>).</p>
   </div>
 </div>
 
@@ -689,11 +849,14 @@
 <div class="section-title">Piramide de Testes</div>
 <div class="pyramid">
   <div class="pyramid-layer pyramid-e2e">E2E Playwright + Screenshots</div>
-  <div class="pyramid-label">QA Agent &mdash; fonte de verdade para aceite</div>
+  <div class="pyramid-label">Escrito e rodado pelo <strong>QA Agent</strong> &mdash; fonte de verdade para aceite</div>
   <div class="pyramid-layer pyramid-integration">Integration Tests</div>
-  <div class="pyramid-label">Dev Agent &mdash; endpoints, queries, componentes</div>
+  <div class="pyramid-label">Escrito e rodado pelo <strong>Dev Agent</strong>, <em>re-executado</em> pelo QA antes do E2E</div>
   <div class="pyramid-layer pyramid-unit">Unit Tests</div>
-  <div class="pyramid-label">Dev Agent &mdash; logica de negocio</div>
+  <div class="pyramid-label">Escrito e rodado pelo <strong>Dev Agent</strong>, <em>re-executado</em> pelo QA antes do E2E</div>
+</div>
+<div style="max-width:720px; margin:1rem auto 0; padding:0.9rem 1.1rem; background:rgba(248,81,73,0.06); border-left:3px solid var(--red); border-radius:4px; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+  <strong style="color:var(--text);">Isolamento do Playwright em paralelo:</strong> cada QA worker sobe o stack alvo em <em>porta aleatoria</em> e usa <em>schema de banco isolado</em> (ou DB em memoria). Fixtures e storage-state sao por worker. Sem <code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">waitForTimeout</code>, sempre <code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">expect().toBeVisible()</code>/<code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">toHaveText()</code> para estabilizar.
 </div>
 
 <!-- ════════════════════════════════════════ -->
