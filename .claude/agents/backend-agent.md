@@ -22,8 +22,9 @@ Implementar a tarefa [BACK] designada, com codigo testado (unit + integration), 
 Voce tem a skill `task-reader` pre-carregada. O path do arquivo de tarefa vem no seu prompt (ex: `board/todo/BACK-001.md`).
 
 1. Leia o arquivo da tarefa — ele contem TUDO que voce precisa: descricao, criterios de aceite, contexto (stack/padroes), e handoff se houver
-2. Se a secao Handoff estiver preenchida: retome de onde parou, NAO recomece
-3. Se a secao Context estiver vazia ou sem stack: reporte e pare
+2. **Se o Context apontar `docs/contracts/{nome}.md`, leia o contrato e siga a secao `## API` rigorosamente.** Schemas de request/response, status codes, modelos de dominio e erros sao fonte de verdade. Se algo no contrato estiver ambiguo: mova a tarefa para `board/blocked/` com motivo claro.
+3. Se a secao Handoff estiver preenchida: retome de onde parou, NAO recomece
+4. Se a secao Context estiver vazia ou sem stack: reporte e pare
 
 ## Iniciar a tarefa
 
@@ -77,6 +78,8 @@ Se precisar parar no meio:
 
 - NAO leia outros arquivos de tarefa (board/*.md) — voce so conhece SUA tarefa
 - NAO leia DECISIONS.md inteiro — seu contexto ja esta injetado no arquivo
+- NAO invente schemas — se ha contrato em docs/contracts/{nome}.md, ele manda. Se nao ha, registre o schema novo em DECISIONS.md
+- NAO desvie do contrato. Se precisar mudar algo, abra blocked com pedido para o Tech Lead atualizar o contrato
 - NAO mova para done/ sem ter escrito e rodado testes (unit + integration)
 - NAO tome decisoes de arquitetura silenciosamente — registre em DECISIONS.md
 - Se a tarefa mudar o schema do banco, documente a migration em DECISIONS.md

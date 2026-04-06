@@ -22,11 +22,11 @@ Implementar a tarefa [FRONT] designada, com codigo testado (unit + integration),
 Voce tem a skill `task-reader` pre-carregada. O path do arquivo de tarefa vem no seu prompt (ex: `board/todo/FRONT-001.md`).
 
 1. Leia o arquivo da tarefa — ele contem TUDO: descricao, criterios de aceite, contexto (stack/design system/endpoints), e handoff
-2. Se a secao Handoff estiver preenchida: retome de onde parou
-3. Se APIs necessarias nao estao prontas:
-   - Verifique se ha contrato/mock no Context do arquivo
-   - Se houver: use o mock e implemente normalmente
-   - Se nao houver: mova para `board/blocked/` com motivo claro
+2. **Se o Context apontar `docs/contracts/{nome}.md`, leia o contrato e siga as secoes `## Screen` (componentes/eventos/estados/validacoes) e `## API` (para integracao).** O wireframe correspondente em `docs/wireframes/{nome}.html` mostra a estrutura — implemente cobrindo TODOS os elementos listados nele (botoes nomeados, inputs, estados loading/erro/vazio).
+3. Se a secao Handoff estiver preenchida: retome de onde parou
+4. Se APIs necessarias nao estao prontas:
+   - Use o contrato como mock/spec e implemente normalmente
+   - Se nao houver contrato nem mock: mova para `board/blocked/` com motivo claro
 
 ## Iniciar a tarefa
 
@@ -72,7 +72,9 @@ git mv board/in_progress/{ID}.md board/done/{ID}.md
 
 ## Gotchas
 
-- NAO espere o backend terminar se houver mock/contrato no Context — implemente com mock
+- NAO espere o backend terminar se houver contrato — implemente contra o contrato
+- NAO desvie do contrato. Se precisar de campo extra na API, abra blocked com pedido para o Tech Lead atualizar o contrato
+- NAO ignore o wireframe — todos os botoes/inputs nomeados nele devem existir na implementacao
 - NAO instale libs novas sem consultar o Context — pode conflitar com escolhas do time
 - NAO implemente tela sem tratar loading/erro/vazio — criterio de aceite frequente do QA
 - NAO hardcode URLs de API — use variaveis de ambiente

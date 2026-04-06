@@ -11,15 +11,19 @@ Inicia o time de desenvolvimento a partir de um PRD.
 
 Se nenhum caminho for passado, solicite que o usuario cole o PRD diretamente no chat.
 
-## Execucao — siga esta sequencia exatamente
+## Execucao — siga esta sequencia exatamente (10 passos)
 
-### PASSO 1 — Criar estrutura do board
+O fluxo agora passa por **wireframes aprovados pelo usuario** e **contratos por feature** ANTES de criar tarefas. Nao crie tarefas no `board/todo/` ate o usuario aprovar os wireframes.
+
+---
+
+### PASSO 1 — Criar estrutura do board e docs
 
 Verifique se `board/` existe. Se nao existir, crie a estrutura:
 
 ```bash
 mkdir -p board/{todo,in_progress,done,verified,blocked}
-mkdir -p docs
+mkdir -p docs/wireframes docs/contracts
 mkdir -p tests/{unit,integration,e2e/{specs,screenshots}}
 ```
 
@@ -50,42 +54,92 @@ Crie `docs/PROGRESS.md` se nao existir:
 
 > Timeline do projeto. Uma linha por evento.
 
-- {DATA_ATUAL} | PROJETO | inicio | orchestrator | Projeto iniciado, aguardando analise do PO
+- {DATA_ATUAL} | PROJETO | inicio | orchestrator | Projeto iniciado, aguardando wireframes do PO
 ```
 
 Se `board/` ja existir (projeto retomado), leia o estado atual e pule para o PASSO 2.
 
-### PASSO 2 — PO Agent analisa o PRD
+---
+
+### PASSO 2 — PO Agent cria wireframes
 
 ```
 Agent(subagent_type="po-agent", prompt="
-Analise o PRD abaixo e crie arquivos de tarefa individuais em board/todo/.
+FASE 1 — Wireframes. NAO crie tarefas ainda.
 
-Siga seu protocolo completo:
-1. Liste board/todo/*.md para ver IDs existentes (evitar duplicatas)
-2. Leia docs/DECISIONS.md para decisoes ja tomadas
-3. Quebre o PRD em tarefas atomicas [BACK], [FRONT] e [DEVOPS] de 1-3h cada
-4. Para cada tarefa, crie um arquivo board/todo/{ID}.md com o formato padrao:
-   - Frontmatter: id, type, priority, depends_on, created, updated
-   - Description, Acceptance Criteria, Context (vazio por agora), Handoff, Log, Test Results
-5. Defina criterios de aceite verificaveis (incluindo visuais para FRONT)
-6. Mapeie dependencias entre tarefas (campo depends_on no frontmatter)
-7. Registre em docs/DECISIONS.md decisoes implicitas do PRD
-8. Reporte o backlog criado
+Leia o PRD abaixo e siga seu protocolo de wireframes:
+1. Identifique todas as telas funcionais (use slugs kebab-case como nome)
+2. Para cada tela, crie docs/wireframes/{nome}.html em HTML puro (SEM CSS/JS)
+3. Use o template do seu agent file: cabecalho de comentario com estados, botoes nomeados, inputs tipados
+4. Crie docs/wireframes/index.html listando todas as telas
+5. Reporte: telas criadas, cobertura do PRD, funcionalidades sem UI (que viram contratos so de API)
 
 PRD:
 {CONTEUDO_COMPLETO_DO_PRD}
 ")
 ```
 
-### PASSO 3 — Tech Lead define a stack
+---
+
+### PASSO 3 — Tech Lead revisa wireframes
 
 ```
 Agent(subagent_type="tech-lead-agent", prompt="
-Setup inicial: o PO criou tarefas em board/todo/.
+Revisao tecnica dos wireframes em docs/wireframes/.
 
-Siga seu protocolo completo:
-1. Liste e leia os arquivos em board/todo/ para entender as necessidades tecnicas
+Siga a secao 'Revisao de wireframes' do seu agent file:
+1. Liste e leia todos os wireframes
+2. Valide cabecalho de estados, nomes de acoes, tipos de input, consistencia de fluxo
+3. Cruze com o PRD: toda funcionalidade com UI esta coberta?
+4. Decida: APROVADO TECNICAMENTE ou REJEITADO com lista de problemas concretos
+5. Registre em PROGRESS.md
+6. Reporte ao orquestrador
+
+PRD:
+{CONTEUDO_COMPLETO_DO_PRD}
+")
+```
+
+Se o Tech Lead rejeitar: invoque o `po-agent` novamente com o feedback (ele segue 'Protocolo de revisao apos feedback'). Limite 2 iteracoes nesta fase.
+
+---
+
+### PASSO 4 — Gate de aprovacao do usuario
+
+**PARE a execucao automatica.** Mostre ao usuario:
+
+```
+Wireframes prontos para revisao:
+
+  Indice: docs/wireframes/index.html
+
+  Telas:
+    - login (docs/wireframes/login.html)
+    - cadastro-cliente (docs/wireframes/cadastro-cliente.html)
+    - {...}
+
+Abra o indice no navegador e revise.
+
+Aprovar? Responda:
+  - "s" ou "sim" para aprovar e prosseguir
+  - Qualquer outro texto sera tratado como feedback e enviado ao PO para ajustes
+```
+
+Aguarde a resposta do usuario.
+
+- Se a resposta for `s`/`sim`: prossiga ao PASSO 5.
+- Caso contrario: invoque o `po-agent` com o feedback do usuario e volte ao PASSO 3 (Tech Lead revisa de novo). **Limite total: 3 ciclos do gate.** Se exceder, reporte ao usuario que ha algo estrutural a resolver antes de continuar.
+
+---
+
+### PASSO 5 — Tech Lead define a stack
+
+```
+Agent(subagent_type="tech-lead-agent", prompt="
+Setup inicial de stack: os wireframes foram aprovados pelo usuario e estao em docs/wireframes/.
+
+Siga seu protocolo de setup inicial:
+1. Liste e leia os wireframes para entender as necessidades tecnicas (formularios, listagens, auth, uploads, etc.)
 2. Defina a stack tecnica completa (linguagem, framework, versoes, padroes)
 3. OBRIGATORIO: inclua Playwright como ferramenta de E2E (fonte de verdade do QA)
 4. Registre TODAS as decisoes em docs/DECISIONS.md com justificativa (formato DEC-TL-XXX)
@@ -94,11 +148,57 @@ Siga seu protocolo completo:
 ")
 ```
 
-### PASSO 3.5 — DevOps Agent faz scaffold do projeto
+---
+
+### PASSO 6 — Tech Lead cria contratos
+
+```
+Agent(subagent_type="tech-lead-agent", prompt="
+Criacao de contratos. Os wireframes foram aprovados e a stack ja esta definida em DECISIONS.md.
+
+Siga a secao 'Criacao de contratos' do seu agent file:
+1. Para cada wireframe em docs/wireframes/{nome}.html, crie docs/contracts/{nome}.md
+2. Cada contrato contem secoes ## API e ## Screen no mesmo arquivo
+3. Schemas devem ser CONCRETOS (sem '...')
+4. Antes de escrever um contrato, registre em DECISIONS.md (DEC-TL-XXX) qualquer escolha nao-trivial: padrao de auth, paginacao, formato de data, status codes, convencao de erro
+5. Funcionalidades sem UI (jobs, webhooks) tambem viram contrato — so secao ## API populada
+6. Liste contratos criados e adicione linha em PROGRESS.md
+")
+```
+
+---
+
+### PASSO 7 — PO Agent cria tarefas a partir dos contratos
+
+```
+Agent(subagent_type="po-agent", prompt="
+FASE 2 — Criacao de tarefas. Wireframes aprovados, contratos criados.
+
+Siga seu 'Protocolo de execucao (Fase 2)':
+1. Liste docs/contracts/*.md
+2. Liste board/todo/*.md (evitar duplicatas)
+3. Leia docs/DECISIONS.md (stack ja definida)
+4. Para CADA contrato, crie tarefas BACK e/ou FRONT em board/todo/{ID}.md:
+   - Titulo deve usar o slug do contrato (ex: 'BACK-003: login')
+   - Frontmatter padrao (id, type, priority, depends_on, created, updated)
+   - Acceptance Criteria verificaveis (incluindo visuais para FRONT)
+   - Context aponta para docs/contracts/{nome}.md (secao API ou Screen) e docs/wireframes/{nome}.html quando aplicavel
+5. Para funcionalidades sem contrato (devops, scripts), crie tarefas DEVOPS sem referencia de contrato
+6. Mapeie dependencias (depends_on)
+7. Reporte backlog criado
+
+PRD (referencia, mas a fonte de verdade agora sao os contratos):
+{CONTEUDO_COMPLETO_DO_PRD}
+")
+```
+
+---
+
+### PASSO 8 — DevOps Agent faz scaffold do projeto
 
 ```
 Agent(subagent_type="devops-agent", prompt="
-Setup inicial: o Tech Lead definiu a stack em docs/DECISIONS.md.
+Setup inicial: stack definida em docs/DECISIONS.md, contratos em docs/contracts/, tarefas em board/todo/.
 
 Siga seu protocolo de scaffold:
 1. Leia docs/DECISIONS.md para a stack completa
@@ -118,19 +218,19 @@ Siga seu protocolo de scaffold:
 ")
 ```
 
-### PASSO 4 — PO Agent injeta contexto e valida cobertura
+---
+
+### PASSO 9 — PO Agent injeta contexto e valida cobertura
 
 ```
 Agent(subagent_type="po-agent", prompt="
-Validacao e injecao de contexto:
+Validacao final e injecao de contexto:
 
-1. Releia docs/DECISIONS.md (agora tem a stack definida pelo Tech Lead)
+1. Releia docs/DECISIONS.md (stack final)
 2. Para CADA arquivo de tarefa em board/todo/:
    - Leia o arquivo
-   - Injete na secao '## Context' as decisoes de DECISIONS.md relevantes para ESTA tarefa:
-     - Tarefa BACK: stack backend, DB, ORM, padroes de API
-     - Tarefa FRONT: stack frontend, design system, endpoints disponíveis
-     - Tarefa DEVOPS: stack completa, infra
+   - Injete na secao '## Context' as decisoes de DECISIONS.md relevantes para ESTA tarefa
+   - Garanta que o caminho do contrato (docs/contracts/{nome}.md) e do wireframe (se FRONT) estao presentes
    - Salve o arquivo atualizado
 3. Verifique se TODAS as funcionalidades do PRD tem tarefa correspondente
 4. Se encontrar gap: crie a tarefa faltante em board/todo/
@@ -141,12 +241,20 @@ PRD:
 ")
 ```
 
-### PASSO 5 — Apresente o resultado ao usuario
+---
 
-Liste `board/todo/` e leia `docs/DECISIONS.md` para mostrar:
+### PASSO 10 — Apresente o resultado ao usuario
+
+Liste `board/todo/`, `docs/wireframes/` e `docs/contracts/` e mostre:
 
 ```
 Dev Team iniciado com sucesso!
+
+Wireframes aprovados:
+  - {N} telas em docs/wireframes/
+
+Contratos:
+  - {N} contratos em docs/contracts/
 
 Backlog:
   - X tarefas [BACK] criadas

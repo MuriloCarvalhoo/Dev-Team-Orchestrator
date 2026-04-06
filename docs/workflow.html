@@ -467,15 +467,47 @@
     </div>
   </div>
 
-  <!-- Step 2: /dev-team-start -->
+  <!-- Step 2: Wireframes -->
   <div class="flow-step">
     <div class="flow-connector">
       <div class="flow-dot dot-po">2</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
-      <h3><code>/dev-team-start</code></h3>
-      <p>Inicializa o projeto em 5 etapas sequenciais: cria estrutura <code>board/</code> e <code>docs/</code>, PO analisa PRD e cria tarefas atomicas uma api/tela por vez, Tech Lead define stack com versoes exatas, DevOps faz scaffold do projeto, PO injeta contexto tecnico em cada tarefa.</p>
+      <h3>Wireframes (PO + Tech Lead + Gate Usuario)</h3>
+      <p>PO Agent cria <code>docs/wireframes/{nome}.html</code> por tela em HTML puro (sem CSS) cobrindo todas as funcionalidades do PRD. Tech Lead revisa cobertura e consistencia. <strong>Execucao pausa</strong> e o usuario aprova manualmente o indice antes de prosseguir. Feedback do usuario reabre o ciclo (max 3 iteracoes).</p>
+      <div class="agents-list">
+        <span class="agent-badge badge-po">PO Agent</span>
+        <span class="agent-badge badge-tl">Tech Lead</span>
+        <span class="agent-badge" style="color:var(--accent); border-color:var(--accent)">Usuario</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Contratos -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-tl">3</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Contratos por feature (Tech Lead)</h3>
+      <p>Apos os wireframes aprovados e a stack definida, Tech Lead cria <code>docs/contracts/{nome}.md</code> — UM arquivo por feature com secoes <code>## API</code> (endpoints, schemas, erros) e <code>## Screen</code> (componentes, eventos, estados, validacoes). Schemas sao concretos. Decisoes nao-triviais (auth, paginacao, status codes) viram <code>DEC-TL-XXX</code> em DECISIONS.md.</p>
+      <div class="agents-list">
+        <span class="agent-badge badge-tl">Tech Lead</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: /dev-team-start -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-po">4</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3><code>/dev-team-start</code> &mdash; criacao de tarefas</h3>
+      <p>O comando orquestra 10 etapas no total: cria estrutura, gera wireframes, revisa, gate do usuario, define stack, gera contratos, PO cria tarefas em <code>board/todo/</code> referenciando contratos pelo slug (ex: <code>BACK-003: login</code> aponta para <code>docs/contracts/login.md</code>), DevOps faz scaffold, PO injeta contexto.</p>
       <div class="agents-list">
         <span class="agent-badge badge-po">PO Agent</span>
         <span class="agent-badge badge-tl">Tech Lead</span>
@@ -484,15 +516,15 @@
     </div>
   </div>
 
-  <!-- Step 3: /dev-team-run -->
+  <!-- Step 5: /dev-team-run -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-back">3</div>
+      <div class="flow-dot dot-back">5</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
       <h3><code>/dev-team-run</code></h3>
-      <strong>Autonomo:</strong> <code>/dev-team-run</code> lanca tarefas independentes em paralelo usando worktrees isolados. Loop continuo ate tudo VERIFIED.</p>
+      <p><strong>Autonomo:</strong> <code>/dev-team-run</code> lanca tarefas independentes em paralelo usando worktrees isolados. Loop continuo ate tudo VERIFIED.</p>
       <div class="agents-list">
         <span class="agent-badge badge-back">Backend</span>
         <span class="agent-badge badge-front">Frontend</span>
@@ -502,15 +534,15 @@
     </div>
   </div>
 
-  <!-- Step 4: Dev implementation -->
+  <!-- Step 6: Dev implementation -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-front">4</div>
+      <div class="flow-dot dot-front">6</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
       <h3>Implementacao + Testes</h3>
-      <p>Cada agente dev le sua tarefa (<code>board/todo/{ID}.md</code>), move para <code>in_progress/</code>, implementa o codigo, escreve testes unitarios e de integracao, e move para <code>done/</code> ao concluir. Decisoes tecnicas novas sao registradas em <code>DECISIONS.md</code>.</p>
+      <p>Cada agente dev le sua tarefa (<code>board/todo/{ID}.md</code>) e o contrato apontado no Context, move para <code>in_progress/</code>, implementa o codigo seguindo o contrato (schemas e eventos sao a fonte de verdade), escreve testes unitarios e de integracao, e move para <code>done/</code> ao concluir. Decisoes tecnicas novas sao registradas em <code>DECISIONS.md</code>.</p>
       <div class="agents-list">
         <span class="agent-badge badge-back">Backend</span>
         <span class="agent-badge badge-front">Frontend</span>
@@ -518,22 +550,22 @@
     </div>
   </div>
 
-  <!-- Step 5: QA -->
+  <!-- Step 7: QA -->
   <div class="flow-step">
     <div class="flow-connector">
-      <div class="flow-dot dot-qa">5</div>
+      <div class="flow-dot dot-qa">7</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
       <h3>QA com Playwright E2E</h3>
-      <p>QA Agent valida cada tarefa em <code>done/</code>: roda testes unitarios e de integracao, escreve specs E2E com Playwright, captura screenshots por criterio de aceite. <strong>Screenshots sao a fonte de verdade.</strong></p>
+      <p>QA Agent valida cada tarefa em <code>done/</code>: roda testes unitarios e de integracao, escreve specs E2E com Playwright (1 spec por criterio de aceite, <code>getByRole</code>/<code>getByLabel</code>, sem <code>waitForTimeout</code>), captura screenshots por criterio. <strong>Screenshots sao a fonte de verdade.</strong></p>
       <div class="agents-list">
         <span class="agent-badge badge-qa">QA Agent</span>
       </div>
     </div>
   </div>
 
-  <!-- Step 6: Verified -->
+  <!-- Step 8: Verified -->
   <div class="flow-step">
     <div class="flow-connector">
       <div class="flow-dot dot-done">&check;</div>
@@ -564,6 +596,21 @@
     <span class="status-node status-blocked" style="display:inline-block; min-width:auto; padding:0.3rem 0.8rem; font-size:0.8rem;">blocked/</span>
     &nbsp;&larr; tarefa bloqueada &nbsp;|&nbsp; Tech Lead decide &rarr; volta para <strong>todo/</strong>
     &nbsp;|&nbsp; QA encontra bug critico &rarr; <strong>done/</strong> volta para <strong>todo/</strong> como <code>FIX-*</code>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- DESIGN ARTIFACTS                         -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Artefatos de Design</div>
+<div class="skills-row">
+  <div class="skill-card">
+    <h4>docs/wireframes/</h4>
+    <p>Um arquivo HTML por tela, sem CSS, com botoes/inputs nomeados e estados (loading/erro/vazio/sucesso) declarados. Aprovados pelo usuario antes de qualquer tarefa ser criada.</p>
+  </div>
+  <div class="skill-card">
+    <h4>docs/contracts/</h4>
+    <p>Um <code>{nome}.md</code> por feature com secoes <code>## API</code> e <code>## Screen</code>. Fonte de verdade compartilhada — backend e frontend implementam contra o mesmo arquivo, referenciado pelo slug no titulo da tarefa.</p>
   </div>
 </div>
 

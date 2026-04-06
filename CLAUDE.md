@@ -52,6 +52,11 @@ board/                    ← kanban visual por pastas
 docs/
   DECISIONS.md            ← decisoes tecnicas (append-only, compartilhado)
   PROGRESS.md             ← timeline leve (one-liners)
+  wireframes/             ← um .html por tela (sem CSS), aprovado pelo usuario
+    index.html            ← indice de telas
+    {nome}.html           ← uma tela
+  contracts/              ← um .md por feature (## API + ## Screen)
+    {nome}.md             ← contrato compartilhado por BACK e FRONT
 tests/
   unit/                   ← testes unitarios (escritos pelo dev)
   integration/            ← testes de integracao (escritos pelo dev)

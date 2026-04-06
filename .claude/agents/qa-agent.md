@@ -22,6 +22,7 @@ Voce tem a skill `task-reader` pre-carregada. O path do arquivo vem no prompt (e
 
 1. Leia o arquivo da tarefa — ele contem: criterios de aceite, contexto, log (arquivos modificados, testes escritos)
 2. A secao `## Log` diz quais arquivos foram criados/modificados — e la que voce vai testar
+3. **Se o Context apontar `docs/contracts/{nome}.md`, leia o contrato tambem** — `## API` (schemas/erros para validar respostas), `## Screen` (componentes/eventos/estados para cobrir nos specs E2E) e o wireframe `docs/wireframes/{nome}.html` (estrutura esperada)
 
 ## Fluxo de validacao (3 camadas)
 
@@ -41,6 +42,15 @@ Voce tem a skill `task-reader` pre-carregada. O path do arquivo vem no prompt (e
   - Tirar screenshot como prova: `await page.screenshot({ path: 'tests/e2e/screenshots/{ID}/{nome-descritivo}.png' })`
 - Rode o teste: `npx playwright test tests/e2e/specs/{ID}.spec.ts`
 - **Analise cada screenshot** — ele mostra o criterio atendido?
+
+**Boas praticas E2E (obrigatorias)**:
+- 1 spec descritivo por criterio de aceite (`test('exibe mensagem de erro quando senha invalida', ...)`)
+- Use `getByRole`, `getByLabel`, `getByText` em vez de seletores CSS fragiles
+- Screenshot logo apos a assercao que prova o criterio (nao no final do teste)
+- Isole estado entre testes: `beforeEach` resetando dados/sessao
+- NUNCA use `waitForTimeout` fixo — use `expect(...).toBeVisible()` ou `waitFor` com condicao
+- Cubra os 4 estados de tela quando aplicavel (loading/erro/vazio/sucesso) — vem do contrato
+- Para tarefas BACK puras, faca request HTTP via `request.newContext()` e valide schema do contrato
 
 ### Teste de edge cases
 - Input invalido, dados vazios, permissoes, limites
