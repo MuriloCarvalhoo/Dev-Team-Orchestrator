@@ -475,7 +475,7 @@
     </div>
     <div class="flow-card">
       <h3><code>/dev-team-start</code></h3>
-      <p>Inicializa o projeto em 5 etapas sequenciais: cria estrutura <code>board/</code> e <code>docs/</code>, PO analisa PRD e cria tarefas atomicas (1-3h), Tech Lead define stack com versoes exatas, DevOps faz scaffold do projeto, PO injeta contexto tecnico em cada tarefa.</p>
+      <p>Inicializa o projeto em 5 etapas sequenciais: cria estrutura <code>board/</code> e <code>docs/</code>, PO analisa PRD e cria tarefas atomicas uma api/tela por vez, Tech Lead define stack com versoes exatas, DevOps faz scaffold do projeto, PO injeta contexto tecnico em cada tarefa.</p>
       <div class="agents-list">
         <span class="agent-badge badge-po">PO Agent</span>
         <span class="agent-badge badge-tl">Tech Lead</span>
@@ -484,15 +484,14 @@
     </div>
   </div>
 
-  <!-- Step 3: dev-team-next OR dev-team-run -->
+  <!-- Step 3: /dev-team-run -->
   <div class="flow-step">
     <div class="flow-connector">
       <div class="flow-dot dot-back">3</div>
       <div class="flow-line"></div>
     </div>
     <div class="flow-card">
-      <h3><code>/dev-team-next</code> ou <code>/dev-team-run</code></h3>
-      <p><strong>Manual:</strong> <code>/dev-team-next</code> seleciona e executa uma tarefa por vez (BACK antes de FRONT, HIGH &gt; MEDIUM &gt; LOW). Auto-desbloqueia tarefas BLOCKED via Tech Lead.<br>
+      <h3><code>/dev-team-run</code></h3>
       <strong>Autonomo:</strong> <code>/dev-team-run</code> lanca tarefas independentes em paralelo usando worktrees isolados. Loop continuo ate tudo VERIFIED.</p>
       <div class="agents-list">
         <span class="agent-badge badge-back">Backend</span>
@@ -667,11 +666,6 @@
       <td><code>/dev-team-start</code></td>
       <td>Inicializa projeto a partir de um PRD: cria board, tarefas, define stack, scaffold</td>
       <td>Sequencial</td>
-    </tr>
-    <tr>
-      <td><code>/dev-team-next</code></td>
-      <td>Seleciona e executa uma tarefa por vez, com auto-desbloqueio</td>
-      <td>Manual</td>
     </tr>
     <tr>
       <td><code>/dev-team-run</code></td>
