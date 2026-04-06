@@ -100,7 +100,7 @@ PRD:
 ")
 ```
 
-Se o Tech Lead rejeitar: invoque o `po-agent` novamente com o feedback (ele segue 'Protocolo de revisao apos feedback'). Limite 2 iteracoes nesta fase.
+Se o Tech Lead rejeitar: invoque o `po-agent` novamente com o feedback (ele segue 'Protocolo de revisao apos feedback'). **Limite 3 iteracoes nesta fase.** Se rejeitado na 3a, o Tech Lead deve registrar `DEC-TL-XXX` em `docs/DECISIONS.md` com as ressalvas e decidir explicitamente: (a) abortar o /dev-team-start ou (b) prosseguir com escopo reduzido (lista das telas que ficam de fora).
 
 ---
 
@@ -147,6 +147,8 @@ Siga seu protocolo de setup inicial:
 6. Atualize a secao 'Stack do Projeto' no CLAUDE.md
 ")
 ```
+
+> **Reconciliacao wireframe ↔ stack:** wireframes sao agnosticos de stack. Se a stack escolhida invalidar uma suposicao implicita de algum wireframe (ex: wireframe assume push em tempo real mas a stack nao tem WebSocket), o Tech Lead deve abrir um mini-loop voltando ao **PASSO 2** (PO ajusta os wireframes afetados) e registrar um `DEC-TL-XXX` justificando. Esse mini-loop NAO conta no limite de 3 iteracoes do gate de aprovacao do usuario.
 
 ---
 
@@ -275,5 +277,5 @@ Estrutura do board:
   board/done/      — (vazio)
   board/verified/  — (vazio)
 
-Proximo passo: /dev-team-next (uma tarefa) ou /dev-team-run (loop autonomo)
+Proximo passo: /dev-team-run (loop autonomo)
 ```

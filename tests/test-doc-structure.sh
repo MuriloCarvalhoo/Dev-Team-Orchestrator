@@ -123,13 +123,23 @@ echo ""
 echo "--- Required Commands ---"
 
 check "dev-team-start command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-start.md'"
-check "dev-team-next command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-next.md'"
 check "dev-team-run command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-run.md'"
 check "dev-team-status command exists" "test -f '$PROJECT_ROOT/.claude/commands/dev-team-status.md'"
 
 # Old commands removed
+check "dev-team-next removed" "! test -f '$PROJECT_ROOT/.claude/commands/dev-team-next.md'"
 check "dev-team-next-parallel removed" "! test -f '$PROJECT_ROOT/.claude/commands/dev-team-next-parallel.md'"
 check "dev-team-review removed" "! test -f '$PROJECT_ROOT/.claude/commands/dev-team-review.md'"
+
+# No file under .claude/ should reference /dev-team-next
+check "no .claude/ file references dev-team-next" "! grep -rq 'dev-team-next' '$PROJECT_ROOT/.claude/'"
+check "CLAUDE.md does not reference dev-team-next" "! grep -q 'dev-team-next' '$PROJECT_ROOT/CLAUDE.md'"
+
+# .gitattributes (only checked if exists — created by devops-agent at /dev-team-start scaffold time)
+if [ -f "$PROJECT_ROOT/.gitattributes" ]; then
+  check ".gitattributes has union merge for DECISIONS.md" "grep -q 'docs/DECISIONS.md.*merge=union' '$PROJECT_ROOT/.gitattributes'"
+  check ".gitattributes has union merge for PROGRESS.md" "grep -q 'docs/PROGRESS.md.*merge=union' '$PROJECT_ROOT/.gitattributes'"
+fi
 
 echo ""
 

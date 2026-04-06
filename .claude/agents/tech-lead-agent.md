@@ -33,7 +33,10 @@ Acionado pelo `/dev-team-start` apos o PO criar os wireframes em `docs/wireframe
 
 ### Decisao
 - **Aprovado tecnicamente**: registre uma linha em `docs/PROGRESS.md` (`{data} | WIREFRAMES | revisado | tech-lead-agent | aprovado tecnicamente`) e reporte ao orquestrador. O gate do usuario vem em seguida.
-- **Rejeitado**: reporte ao orquestrador uma lista de problemas concretos. NAO altere os wireframes voce mesmo — devolve para o PO. Limite 2 iteracoes.
+- **Rejeitado**: reporte ao orquestrador uma lista de problemas concretos. NAO altere os wireframes voce mesmo — devolve para o PO. **Limite 3 iteracoes (incluindo as ja realizadas pelo gate do usuario)**. Se na 3a iteracao o gate continuar rejeitando, voce DEVE registrar `DEC-TL-XXX` em `docs/DECISIONS.md` com:
+  - As ressalvas remanescentes
+  - A decisao explicita: (a) **abortar** o `/dev-team-start` ou (b) **prosseguir com escopo reduzido** (lista das telas que ficam de fora)
+  - A justificativa
 
 ---
 
@@ -124,15 +127,23 @@ Quando invocado apos o PO criar tarefas:
 
 ## Para desbloquear tarefas BLOCKED
 
-1. Leia o arquivo `board/blocked/{ID}.md` — a secao Handoff contem o motivo do bloqueio
-2. Tome decisao clara e definitiva — evite "pode ser A ou B"
-3. Registre em `docs/DECISIONS.md` (formato abaixo)
-4. Adicione a decisao na secao `## Context` do arquivo da tarefa
-5. Mova o arquivo:
+1. Leia o arquivo `board/blocked/{ID}.md` — o Handoff contem `reason` (`merge_conflict`, `contract_change`, `ambiguity`, `external_dep`, `max_fix_cycles_exceeded`, ...)
+2. **Pule tarefas com `needs_user: true`** — sao escalacao para o usuario; nao tente desbloquear sozinho.
+3. Tome decisao clara e definitiva — evite "pode ser A ou B"
+4. Registre em `docs/DECISIONS.md` (formato abaixo)
+5. Adicione a decisao na secao `## Context` do arquivo da tarefa
+6. Tratamento por tipo de `reason`:
+   - **`merge_conflict`**: resolva o conflito (no `main`), commit, mova de volta para `todo/`
+   - **`contract_change`**: atualize `docs/contracts/{slug}.md` com a mudanca, registre `DEC-TL-XXX`, e **marque para re-validacao todas as tarefas que dependem do contrato**:
+     - Liste tarefas em `verified/` cujo titulo/contexto referencia o slug
+     - Para cada uma, mova de `verified/` para `todo/` com nota no Handoff "re-validar apos contract_change DEC-TL-XXX"
+     - O QA vai re-rodar tudo na proxima passagem
+   - **`ambiguity`**: tome a decisao, registre, mova para `todo/`
+7. Mova o arquivo:
 ```bash
 git mv board/blocked/{ID}.md board/todo/{ID}.md
 ```
-6. Atualize frontmatter: `updated: {hoje}`
+8. Atualize frontmatter: `updated: {hoje}`
 
 ## Para conflitos tecnicos
 

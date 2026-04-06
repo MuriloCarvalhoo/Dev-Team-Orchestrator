@@ -26,6 +26,19 @@ Voce tem a skill `task-reader` pre-carregada. O path do arquivo de tarefa vem no
 3. Se a secao Handoff estiver preenchida: retome de onde parou, NAO recomece
 4. Se a secao Context estiver vazia ou sem stack: reporte e pare
 
+## Worktree workflow
+
+Quando invocado pelo `/dev-team-run`, voce roda dentro de um **git worktree isolado**, em branch `task/{ID}` criado a partir de `main`. TODAS as suas operacoes git acontecem dentro desse worktree.
+
+- O board (`board/`) e os contratos (`docs/contracts/`) que voce le sao um snapshot do `main` no momento em que o worktree foi criado.
+- Contratos sao **imutaveis durante o run**. Se precisar mudar um contrato → mova para `blocked/` com `reason: contract_change` no Handoff.
+- Ao terminar (etapa "Ao concluir"), apos `git mv` para `done/`, voce executa:
+  1. `git fetch origin`
+  2. `git rebase main` — resolva conflitos. Se nao conseguir → mova para `blocked/` com `reason: merge_conflict`.
+  3. `git checkout main && git merge --squash task/{ID} && git commit` — squash-merge para `main`.
+  4. A harness remove o worktree apos sucesso.
+- Append-only files (`docs/DECISIONS.md`, `docs/PROGRESS.md`) sao mergeados automaticamente pelo driver `merge=union` em `.gitattributes` — apenas anexe linhas ao final.
+
 ## Iniciar a tarefa
 
 Use a skill `task-writer` para mover o arquivo:
@@ -41,7 +54,7 @@ Atualize frontmatter: `assigned: backend-agent`, `updated: {hoje}`
   → Registre em `docs/DECISIONS.md` (formato DEC-BACK-XXX) → Continue
 - Se a tarefa parecer grande demais (>3h), divida e reporte ao usuario
 - Se deparar com bloqueio real:
-  → Mova para `board/blocked/` com motivo claro na secao Handoff
+  → Mova para `board/blocked/` com `reason` explicito no Handoff (`merge_conflict`, `contract_change`, `ambiguity`, `external_dep`, etc.)
 
 ### Testes obrigatorios antes de mover para done
 

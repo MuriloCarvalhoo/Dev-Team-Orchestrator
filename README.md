@@ -34,24 +34,27 @@ Cada **command** orquestra a execucao, selecionando quais **agents** invocar. Ca
                       │
                       ▼
 ┌─────────────────────────────────────────────────────┐
-│  /dev-team-next (manual) ou /dev-team-run (auto)    │
+│  /dev-team-run (loop autonomo)                      │
 │                                                     │
 │  Para cada tarefa:                                  │
 │    Dev le board/todo/{ID}.md                        │
+│    Em git worktree isolado (branch task/{ID})       │
 │    Move todo/ → in_progress/ → done/                │
 │    Escreve unit + integration tests                 │
+│    Rebase + squash-merge para main                  │
 │                                                     │
-│  /dev-team-run lanca tarefas em paralelo            │
-│  (worktrees isolados, merge automatico)             │
+│  Ate 3 worktrees em paralelo (configuravel)         │
 └─────────────────────┬───────────────────────────────┘
                       │
                       ▼
 ┌─────────────────────────────────────────────────────┐
-│  QA Agent                                           │
+│  QA Agent (sempre no main)                          │
 │  Roda unit + integration tests                      │
 │  Escreve E2E Playwright specs + screenshots         │
 │  Screenshots = fonte de verdade                     │
-│  Aprovado → verified/  |  Bug → cria FIX-* → todo/ │
+│  Aprovado → verified/                               │
+│  Bug critico → cria FIX-{ID}-N → todo/              │
+│                e marca original verified+has_fix    │
 └─────────────────────┬───────────────────────────────┘
                       │
                       ▼
@@ -63,10 +66,9 @@ Cada **command** orquestra a execucao, selecionando quais **agents** invocar. Ca
 
 | Comando | Descricao |
 |---|---|
-| `/dev-team-start` | Inicializa projeto a partir de PRD: cria board, tarefas, define stack, scaffold |
-| `/dev-team-next` | Seleciona e executa uma tarefa por vez, com auto-desbloqueio de BLOCKED |
-| `/dev-team-run` | Loop autonomo: tarefas em paralelo + QA automatico ate tudo verified |
-| `/dev-team-status` | Snapshot visual do board (read-only, sem agentes) |
+| `/dev-team-start` | Inicializa projeto a partir de PRD: wireframes, gate do usuario, contratos, board, scaffold |
+| `/dev-team-run` | Loop autonomo: dev paralelo em worktrees + QA no main ate tudo verified |
+| `/dev-team-status` | Snapshot visual do board (read-only, le do main) |
 
 ## Agentes
 
@@ -88,8 +90,8 @@ board/todo/       →  board/in_progress/  →  board/done/      →  board/veri
                           │                       │
                           ▼                       ▼
                     board/blocked/          (bug critico)
-                    Tech Lead decide        QA cria FIX-*
-                    volta p/ todo/          volta p/ todo/
+                    Tech Lead decide        QA cria FIX-{ID}-N em todo/
+                    volta p/ todo/          original vai p/ verified/ has_fix
 ```
 
 Cada tarefa e um arquivo `board/{status}/{ID}.md` com:
@@ -108,9 +110,8 @@ seu-projeto/
 │   │   ├── frontend-agent.md
 │   │   ├── qa-agent.md
 │   │   └── devops-agent.md
-│   ├── commands/                   ← 4 comandos /dev-team-*
+│   ├── commands/                   ← 3 comandos /dev-team-*
 │   │   ├── dev-team-start.md
-│   │   ├── dev-team-next.md
 │   │   ├── dev-team-run.md
 │   │   └── dev-team-status.md
 │   ├── skills/                     ← 3 skills compartilhadas
@@ -146,7 +147,7 @@ seu-projeto/
 | Integration | Dev agent | Antes de mover para `done/` | Supertest / Testing Library |
 | E2E | QA agent | Ao validar tarefa em `done/` | **Playwright** (screenshots) |
 
-**Playwright screenshots sao a fonte de verdade.** Se o screenshot nao confirma o criterio de aceite, a tarefa volta para `todo/`.
+**Playwright screenshots sao a fonte de verdade.** Se o screenshot nao confirma o criterio de aceite, o QA cria uma tarefa `FIX-{ID}-N` em `board/todo/` e a tarefa original vai para `verified/` com flag `has_fix`. Cada tarefa tem orcamento de 3 ciclos de FIX antes de ser escalada ao usuario.
 
 ## Instalacao
 
@@ -156,18 +157,13 @@ seu-projeto/
 ## Uso
 
 ```bash
-# 1. Iniciar com um PRD
+# 1. Iniciar com um PRD (cria wireframes, gate de aprovacao, contratos, board, scaffold)
 /dev-team-start docs/prd.md
 
-# 2a. Executar tarefas manualmente
-/dev-team-next              # escolhe automaticamente
-/dev-team-next BACK         # forca backend
-/dev-team-next BACK-003     # tarefa especifica
+# 2. Modo autonomo (loop paralelo ate concluir)
+/dev-team-run
 
-# 2b. Modo autonomo (recomendado)
-/dev-team-run               # loop paralelo ate concluir
-
-# 3. Ver status a qualquer momento
+# 3. Ver status a qualquer momento (read-only)
 /dev-team-status
 ```
 
@@ -176,7 +172,7 @@ seu-projeto/
 ```bash
 /dev-team-start    # detecta board/ existente e pula criacao
 /dev-team-status   # ver onde parou
-/dev-team-next     # continuar
+/dev-team-run      # continuar o loop
 ```
 
 ## Estado Compartilhado

@@ -43,9 +43,21 @@ Quando invocado pelo /dev-team-start apos o Tech Lead definir a stack:
    - Integration tests: Supertest (API) / Testing Library (componentes)
    - E2E tests: **Playwright** — instale e configure
    - Crie diretorios: `tests/unit/`, `tests/integration/`, `tests/e2e/specs/`, `tests/e2e/screenshots/`
-   - Crie playwright.config.ts com configuracao base
-7. Crie Dockerfile basico se a stack justificar
-8. Verifique que o projeto compila/roda sem erros
+   - Crie `playwright.config.ts` com **isolamento de paralelismo**:
+     - `workers: process.env.CI ? 2 : 3`
+     - Cada worker usa **porta aleatoria** (use `0` ou helper que pega porta livre)
+     - Cada worker usa **schema de DB isolado** (`test_w${workerIndex}`) ou DB em memoria
+     - `storageState` por worker
+     - Sem `waitForTimeout`; auto-wait via `expect(...).toBeVisible()`
+7. **Crie `.gitattributes` na raiz do projeto** com o driver `union` para arquivos append-only:
+   ```
+   docs/DECISIONS.md merge=union
+   docs/PROGRESS.md merge=union
+   ```
+   Isso e CRITICO — sem isso, agentes em paralelo entram em conflito ao anexar entradas. Sem isso, `/dev-team-run` quebra.
+8. Crie Dockerfile basico se a stack justificar
+9. Verifique que o projeto compila/roda sem erros
+10. Documente o teto de paralelismo (`MAX_PARALLEL=3` worktrees) no `docs/DECISIONS.md` como `DEC-DEVOPS-XXX`
 
 ## Para tarefas [DEVOPS] do board
 
@@ -76,4 +88,6 @@ Use a skill `task-writer` para:
 - NAO crie CI/CD pipeline sem saber o provider — verifique em DECISIONS.md
 - NAO esqueca de rodar o projeto apos scaffold para verificar que funciona
 - NAO esqueca de configurar Playwright — e a fonte de verdade do QA
+- NAO esqueca do `.gitattributes` com `merge=union` — sem isso o loop autonomo quebra em conflitos triviais
+- NAO esqueca de configurar workers/portas/DB schemas isolados no Playwright — sem isso E2Es paralelos colidem
 - Registre TUDO em DECISIONS.md — o time precisa saber onde ficam as configs

@@ -104,7 +104,7 @@ Liste:
 - Funcionalidades que NAO viraram tela (ex: jobs, webhooks) — para o Tech Lead saber que viram contratos so de API
 - Caminho do indice para revisao
 
-Aguarde revisao do Tech Lead e gate do usuario.
+Aguarde revisao do Tech Lead, e em seguida o **gate de aprovacao do usuario** (o usuario abre `docs/wireframes/index.html` e aprova ou da feedback). O gate tem **limite de 3 iteracoes** — se passar disso, o Tech Lead registra `DEC-TL-XXX` e decide entre abortar ou prosseguir com escopo reduzido.
 
 ---
 

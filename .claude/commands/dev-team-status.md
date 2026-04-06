@@ -10,6 +10,8 @@ Exibe um snapshot completo do estado atual do projeto baseado na estrutura `boar
 
 ## Execucao
 
+**Sempre leia do `main`** — `/dev-team-status` NUNCA agrega worktrees ativos. Worktrees em andamento sao invisiveis ao status; o board so e atualizado quando o agente faz squash-merge para `main`.
+
 Liste os arquivos em cada subpasta de `board/` e leia frontmatter de cada um.
 Leia `docs/DECISIONS.md` para a stack.
 Leia as ultimas 5 linhas de `docs/PROGRESS.md` para atividade recente.
@@ -80,8 +82,8 @@ VERIFIED: {N} de {TOTAL} tarefas ({%}%)
 
 | Situacao | Sugestao |
 |---|---|
-| Tarefas em board/todo/ disponiveis | `/dev-team-next` ou `/dev-team-run` |
+| Tarefas em board/todo/ disponiveis | `/dev-team-run` |
 | Tarefas em board/done/ | `/dev-team-run` (inclui QA automatico) |
-| Apenas blocked/ e sem todo/ disponivel | Resolver bloqueio manualmente |
-| Tudo em board/verified/ | "Projeto completo!" |
-| FIX CRITICO em board/todo/ | `/dev-team-next {FIX-ID}` |
+| Apenas blocked/ com `needs_user` | Resolver manualmente e remover a flag |
+| Tudo em board/verified/ sem FIX-* | "Projeto completo!" |
+| FIX-* pendentes em board/todo/ | `/dev-team-run` (loop os trata como tarefas normais) |

@@ -91,10 +91,9 @@ Cada `board/{status}/{ID}.md`:
 
 | Comando | Descricao |
 |---|---|
-| `/dev-team-start` | Inicia o time com um PRD — cria board/ e arquivos de tarefa |
-| `/dev-team-next [TIPO\|ID]` | Executa uma tarefa (modo manual) |
-| `/dev-team-run` | Loop autonomo: dev paralelo + QA automatico ate tudo verified |
-| `/dev-team-status` | Mostra snapshot visual do board |
+| `/dev-team-start` | Inicia o time com um PRD — wireframes, contratos, board/, scaffold |
+| `/dev-team-run` | Loop autonomo: dev paralelo em worktrees + QA no main ate tudo verified |
+| `/dev-team-status` | Snapshot visual do board (read-only, le do main) |
 
 ## Invocacao de Subagentes
 
@@ -110,4 +109,15 @@ O campo `subagent_type` deve corresponder exatamente ao campo `name:` no frontma
 | Integration | Dev agent | Antes de mover para done/ | Supertest/Testing Library |
 | E2E | QA agent | Ao validar tarefa em done/ | **Playwright** (screenshots) |
 
-**Playwright screenshots sao a fonte de verdade.** Se o screenshot nao confirma o criterio de aceite, a tarefa volta para todo/.
+**Playwright screenshots sao a fonte de verdade.** Se o screenshot nao confirma o criterio de aceite, o QA cria uma nova tarefa `FIX-{ID}-N` em `board/todo/` e a tarefa original vai para `verified/` com flag `has_fix: true` (NUNCA volta para `todo/`).
+
+## Governanca do /dev-team-run
+
+- **Worktrees por tarefa**: cada tarefa paralela roda em um `git worktree` isolado em branch `task/{ID}` criado a partir de `main`. O dev faz `rebase` + `squash-merge` ao mover para `done/`. **Limite default: 3 worktrees simultaneos.**
+- **Board e fonte unica e mora no `main`**. `/dev-team-status` e `board-scanner` sempre leem do `main`, nunca agregam worktrees ativos. QA tambem opera no `main`, nunca em worktrees.
+- **`.gitattributes` com `merge=union`** para `docs/DECISIONS.md` e `docs/PROGRESS.md` (configurado pelo `devops-agent` no scaffold) — permite que multiplos agentes anexem linhas em paralelo sem conflito.
+- **Contratos sao imutaveis durante o run**. Mudar contrato → tarefa vai para `blocked/` com `reason: contract_change`; Tech Lead atualiza, registra `DEC-TL-XXX` e marca dependentes para re-validacao.
+- **Circuit breaker do QA**: cada tarefa original tem orcamento de **3 ciclos de FIX-***. Na 4a falha, vai para `blocked/` com `needs_user: true`.
+- **Wireframes (gate do usuario)**: maximo de **3 iteracoes** de feedback. Se rejeitar na 3a, Tech Lead registra `DEC-TL-XXX` e decide entre abortar ou prosseguir com escopo reduzido.
+- **Wireframes validam estrutura, NAO estetica**. Estetica vem do frontend-agent na implementacao e e validada via screenshots do QA.
+- **Smoke test final**: apos a ultima tarefa entrar em `verified/` (sem `FIX-*` pendente), o QA executa um E2E ponta-a-ponta do sistema inteiro antes do projeto ser considerado entregue.

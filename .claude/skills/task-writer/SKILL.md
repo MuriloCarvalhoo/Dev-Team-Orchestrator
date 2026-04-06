@@ -45,18 +45,14 @@ git mv board/done/{ID}.md board/verified/{ID}.md
 - Update frontmatter: `updated: {today}`
 - Fill `## Test Results` with test outcomes and screenshot references
 
-**QA rejecting — critical bug (done → todo):**
-```bash
-git mv board/done/{ID}.md board/todo/{ID}.md
-```
-- Update frontmatter: `updated: {today}`
-- Create NEW file `board/todo/FIX-{TYPE}-{N}.md` with bug report
-
-**QA rejecting — minor bug (done → verified, FIX created):**
+**QA rejecting — critical bug (done → verified WITH `has_fix`):**
+The original task NEVER goes back to `todo/`. Always:
 ```bash
 git mv board/done/{ID}.md board/verified/{ID}.md
 ```
-- Create NEW file `board/todo/FIX-{TYPE}-{N}.md` with bug report
+- Update frontmatter: `has_fix: true`, `fix_cycles: {prev+1}`, `updated: {today}`
+- Create NEW file `board/todo/FIX-{ID}-{N}.md` with bug report (where `{ID}` is the original task id and `{N}` is the next fix number for it)
+- **Circuit breaker**: if `fix_cycles` would exceed 3, DO NOT create FIX-*. Instead move the original to `board/blocked/` with `needs_user: true` and `reason: max_fix_cycles_exceeded`.
 
 **Unblocking (blocked → todo):**
 ```bash
