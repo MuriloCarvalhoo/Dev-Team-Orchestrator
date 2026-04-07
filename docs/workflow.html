@@ -41,8 +41,29 @@
     text-align: center;
     color: var(--text-muted);
     font-size: 0.95rem;
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.2rem;
   }
+
+  .top-link {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .top-link a {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .top-link a:hover { border-color: var(--accent); }
 
   /* ── Section titles ── */
   .section-title {
@@ -515,6 +536,10 @@
 
 <h1>Dev Team Orchestrator</h1>
 <p class="subtitle">Fluxo de trabalho completo — Command &rarr; Agent &rarr; Skill</p>
+<div class="top-link">
+  <a href="index.html">&larr; Voltar para o inicio</a>
+  <a href="workflow-brownfield.html">Ver workflow brownfield &rarr;</a>
+</div>
 
 <!-- ════════════════════════════════════════ -->
 <!-- ARCHITECTURE PATTERN                     -->

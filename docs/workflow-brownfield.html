@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Team Orchestrator — Workflow Brownfield</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+    --yellow: #d4a017;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    padding: 2rem;
+    min-height: 100vh;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+  }
+
+  .top-link {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    display: flex;
+    gap: 0.6rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .top-link a {
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 0.35rem 0.9rem;
+    border-radius: 20px;
+    transition: border-color 0.2s;
+  }
+
+  .top-link a:hover { border-color: var(--accent); }
+
+  /* ── Proposal banner ── */
+  .proposal-banner {
+    max-width: 900px;
+    margin: 0 auto 2.5rem;
+    padding: 1rem 1.3rem;
+    background: rgba(212,160,23,0.08);
+    border: 1px solid var(--yellow);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .proposal-banner strong {
+    color: var(--yellow);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.78rem;
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ── Section titles ── */
+  .section-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 2.5rem 0 1.2rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* ── Compare table (greenfield vs brownfield) ── */
+  .compare-table {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .compare-table th, .compare-table td {
+    padding: 0.85rem 1.1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    vertical-align: top;
+  }
+
+  .compare-table thead th {
+    background: rgba(88,166,255,0.06);
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .compare-table tbody td:first-child {
+    color: var(--text-muted);
+    font-weight: 500;
+    width: 22%;
+  }
+
+  .compare-table tbody td.greenfield { color: var(--text); }
+  .compare-table tbody td.brownfield { color: var(--text); border-left: 1px solid var(--border); }
+
+  .compare-table code {
+    background: rgba(88,166,255,0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  /* ── Flow diagram ── */
+  .flow {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 0.5rem;
+    position: relative;
+  }
+
+  .flow-connector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 48px;
+  }
+
+  .flow-dot {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+    color: #fff;
+  }
+
+  .flow-line {
+    width: 2px;
+    height: 40px;
+    background: var(--border);
+  }
+
+  .flow-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.4rem;
+    flex: 1;
+    max-width: 900px;
+  }
+
+  .flow-card h3 {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .flow-card p {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.5;
+  }
+
+  .flow-card .agents-list {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .flow-card ol.substeps {
+    margin: 0.7rem 0 0.7rem 1.3rem;
+    padding: 0;
+  }
+
+  .flow-card ol.substeps li {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    line-height: 1.55;
+    margin-bottom: 0.5rem;
+  }
+
+  .flow-card ol.substeps li strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .flow-card .note-box {
+    margin-top: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    background: rgba(88,166,255,0.06);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .flow-card .note-box.warn {
+    background: rgba(210,153,34,0.08);
+    border-left-color: var(--orange);
+  }
+
+  .flow-card .note-box.danger {
+    background: rgba(248,81,73,0.08);
+    border-left-color: var(--red);
+  }
+
+  .flow-card .note-box.new {
+    background: rgba(212,160,23,0.08);
+    border-left-color: var(--yellow);
+  }
+
+  .flow-card .note-box strong {
+    color: var(--text);
+  }
+
+  .agent-badge {
+    font-size: 0.75rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+    font-weight: 500;
+    border: 1px solid;
+  }
+
+  .badge-po { color: var(--purple); border-color: var(--purple); }
+  .badge-tl { color: var(--orange); border-color: var(--orange); }
+  .badge-devops { color: var(--cyan); border-color: var(--cyan); }
+  .badge-back { color: var(--green); border-color: var(--green); }
+  .badge-front { color: var(--pink); border-color: var(--pink); }
+  .badge-qa { color: var(--red); border-color: var(--red); }
+  .badge-arch { color: var(--yellow); border-color: var(--yellow); }
+
+  .dot-po { background: var(--purple); }
+  .dot-tl { background: var(--orange); }
+  .dot-devops { background: var(--cyan); color: #000; }
+  .dot-back { background: var(--green); color: #000; }
+  .dot-front { background: var(--pink); color: #000; }
+  .dot-qa { background: var(--red); }
+  .dot-user { background: var(--accent); }
+  .dot-done { background: var(--green); color: #000; }
+  .dot-arch { background: var(--yellow); color: #000; }
+
+  /* ── Parallel/grid cards ── */
+  .parallel-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .parallel-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+  }
+
+  .parallel-card h4 {
+    font-size: 0.95rem;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+
+  .parallel-card p, .parallel-card li {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .parallel-card ol, .parallel-card ul {
+    margin: 0.4rem 0 0 1.1rem;
+    padding: 0;
+  }
+
+  .parallel-card ol li, .parallel-card ul li {
+    margin-bottom: 0.35rem;
+  }
+
+  .parallel-card code {
+    background: rgba(88,166,255,0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  .parallel-card strong {
+    color: var(--text);
+  }
+
+  /* ── Agent grid ── */
+  .agent-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+
+  .agent-card:hover {
+    border-color: var(--accent);
+  }
+
+  .agent-card.new {
+    border-color: var(--yellow);
+    background: rgba(212,160,23,0.04);
+  }
+
+  .agent-card h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .agent-card .role {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 0.6rem;
+  }
+
+  .agent-card .desc {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .agent-card .tag {
+    display: inline-block;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-bottom: 0.4rem;
+  }
+
+  .agent-card .tag.new {
+    background: var(--yellow);
+    color: #000;
+    font-weight: 700;
+  }
+
+  .agent-card .tag.modified {
+    background: rgba(88,166,255,0.15);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+  }
+
+  .agent-card .tag.unchanged {
+    background: rgba(139,148,158,0.12);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  .agent-card .tools {
+    margin-top: 0.6rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+
+  .agent-card .tools code {
+    background: rgba(88,166,255,0.1);
+    padding: 0.1rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    color: var(--accent);
+  }
+
+  /* ── Roadmap ── */
+  .roadmap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .roadmap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.3rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .roadmap-item .step-num {
+    background: var(--border);
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+  }
+
+  .roadmap-item.done .step-num {
+    background: var(--green);
+    color: #000;
+  }
+
+  .roadmap-item h4 {
+    font-size: 0.95rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .roadmap-item p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+  }
+
+  .roadmap-item .status {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+  }
+
+  .roadmap-item .status.done {
+    background: rgba(63,185,80,0.15);
+    color: var(--green);
+    border: 1px solid var(--green);
+  }
+
+  .roadmap-item .status.pending {
+    background: rgba(139,148,158,0.1);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 640px) {
+    body { padding: 1rem; }
+    .flow-card { padding: 0.8rem 1rem; }
+    .agent-grid { grid-template-columns: 1fr; }
+    .compare-table thead { display: none; }
+    .compare-table, .compare-table tbody, .compare-table tr, .compare-table td { display: block; width: 100%; }
+    .compare-table tbody td { border-left: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Workflow Brownfield</h1>
+<p class="subtitle">Adocao de repositorios com codigo existente</p>
+<div class="top-link">
+  <a href="index.html">&larr; Voltar para o inicio</a>
+  <a href="workflow.html">Ver workflow greenfield &rarr;</a>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- PROPOSAL BANNER                          -->
+<!-- ════════════════════════════════════════ -->
+<div class="proposal-banner">
+  <strong>Proposta &mdash; nao implementado</strong>
+  Este documento descreve um fluxo <em>pretendido</em> para rodar o Dev Team Orchestrator em repositorios que ja contem codigo em producao. O comando <code>/dev-team-brownfield</code> e o agente <code>code-archaeologist</code> citados aqui <strong>ainda nao existem</strong> &mdash; serao implementados em entregas seguintes (ver Roadmap no final). O workflow greenfield em <code>workflow.html</code> permanece como esta.
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- GREENFIELD VS BROWNFIELD                 -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Greenfield vs Brownfield</div>
+<table class="compare-table">
+  <thead>
+    <tr>
+      <th>Aspecto</th>
+      <th>Greenfield (<code>/dev-team-start</code>)</th>
+      <th>Brownfield (<code>/dev-team-brownfield</code>)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Ponto de partida</td>
+      <td class="greenfield">Repo vazio ou esqueleto. PRD descreve o sistema do zero.</td>
+      <td class="brownfield">Repo em producao. PRD descreve <em>features novas</em>, <em>extensoes</em> ou <em>refactors</em>.</td>
+    </tr>
+    <tr>
+      <td>Stack</td>
+      <td class="greenfield">Tech Lead <strong>decide</strong> stack do zero e registra em <code>DECISIONS.md</code>.</td>
+      <td class="brownfield">Tech Lead <strong>detecta</strong> stack via snapshot do <code>code-archaeologist</code> e <em>documenta</em> o que ja existe.</td>
+    </tr>
+    <tr>
+      <td>Scaffold</td>
+      <td class="greenfield">DevOps cria <code>package.json</code>, configs, instala deps, sobe Playwright.</td>
+      <td class="brownfield">DevOps em modo <strong>"validar, nao criar"</strong>: confere infra existente, instala apenas o gap (ex: Playwright).</td>
+    </tr>
+    <tr>
+      <td>Wireframes</td>
+      <td class="greenfield">Para <strong>todas</strong> as telas do PRD.</td>
+      <td class="brownfield">Apenas para UI <strong>nova ou alterada</strong>. Telas existentes nao sao retro-documentadas.</td>
+    </tr>
+    <tr>
+      <td>Contratos</td>
+      <td class="greenfield">Tudo <code>new:</code> &mdash; contratos descrevem APIs/telas a serem criadas.</td>
+      <td class="brownfield">Diferenciam <code>extends:</code> (referenciam codigo existente por path:line) de <code>new:</code>.</td>
+    </tr>
+    <tr>
+      <td>Tarefas</td>
+      <td class="greenfield"><code>BACK</code>, <code>FRONT</code>, <code>DEVOPS</code>.</td>
+      <td class="brownfield">Mesmos tipos + classificacao: <code>FEATURE</code>, <code>EXTEND</code>, <code>REFACTOR</code>.</td>
+    </tr>
+    <tr>
+      <td>Risco principal</td>
+      <td class="greenfield">Baixo &mdash; nada existe ainda.</td>
+      <td class="brownfield">Alto &mdash; sobrescrever/quebrar codigo legado. Recomendado rodar em branch isolada.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ════════════════════════════════════════ -->
+<!-- MAIN FLOW                                -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Fluxo Brownfield</div>
+<div class="flow">
+
+  <!-- Step 0: code-archaeologist scan -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-arch">0</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3><span class="agent-badge badge-arch" style="margin-right:0.5rem">NOVO</span>Code Archaeologist faz varredura do repo</h3>
+      <p>Antes de qualquer outra coisa, o agente <code>code-archaeologist</code> escaneia o repositorio existente para entender com o que esta lidando. Output: um <strong>snapshot estruturado</strong> que alimenta todos os passos seguintes.</p>
+      <ol class="substeps">
+        <li><strong>Detecta linguagem e stack</strong> lendo manifests: <code>package.json</code>, <code>go.mod</code>, <code>pyproject.toml</code>, <code>Cargo.toml</code>, <code>pom.xml</code>, <code>Gemfile</code>, <code>composer.json</code>.</li>
+        <li><strong>Detecta framework</strong> (backend e frontend) via configs: <code>tsconfig.json</code>, <code>vite.config.ts</code>, <code>next.config.js</code>, <code>nest-cli.json</code>, <code>django</code> settings, etc.</li>
+        <li><strong>Mapeia rotas/endpoints existentes</strong> via Grep nos paths convencionais (<code>routes/</code>, <code>controllers/</code>, <code>handlers/</code>, <code>api/</code>) com referencia file:line.</li>
+        <li><strong>Detecta runners de teste</strong> ja configurados (Jest, Vitest, pytest, go test) e se Playwright ja esta instalado.</li>
+        <li><strong>Lista scripts</strong> disponiveis (<code>npm run</code>, Makefile targets, etc.) e infra (Dockerfile, docker-compose, CI configs).</li>
+        <li><strong>Gera <code>docs/repo-snapshot.md</code></strong> &mdash; relatorio estruturado consumido pelo Tech Lead e PO nos passos seguintes.</li>
+      </ol>
+      <div class="note-box new">
+        <strong>Read-only:</strong> nesta fase o <code>code-archaeologist</code> nao escreve nada alem de <code>docs/repo-snapshot.md</code>. Nenhuma modificacao em codigo, configs ou dependencias.
+      </div>
+      <div class="agents-list">
+        <span class="agent-badge badge-arch">Code Archaeologist</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 1: Tech Lead consumes snapshot -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-tl">1</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Tech Lead documenta a stack existente</h3>
+      <p>Tech Lead <strong>nao decide</strong> stack &mdash; le <code>docs/repo-snapshot.md</code> e popula a tabela Stack em <code>DECISIONS.md</code> com o que ja existe. Cada item vira uma decisao <code>DEC-TL-ADOPT-XXX</code> registrando "stack adotada do repo, nao escolhida".</p>
+      <div class="note-box">
+        <strong>Gap de E2E:</strong> se o snapshot indicar que Playwright nao esta instalado, Tech Lead registra <code>DEC-TL-ADOPT-XXX</code> propondo adicionar Playwright como E2E (DevOps instala depois no PASSO 6, sem mexer em testes existentes).
+      </div>
+      <div class="agents-list">
+        <span class="agent-badge badge-tl">Tech Lead</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: PO classifies PRD -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-po">2</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>PO classifica o PRD contra o repo</h3>
+      <p>PO le PRD + <code>docs/repo-snapshot.md</code> e classifica cada requisito como:</p>
+      <ol class="substeps">
+        <li><strong>FEATURE</strong> &mdash; funcionalidade totalmente nova, sem codigo equivalente.</li>
+        <li><strong>EXTEND</strong> &mdash; estende um endpoint/tela ja existente (referencia o path:line do snapshot).</li>
+        <li><strong>REFACTOR</strong> &mdash; substitui codigo existente sem mudar a interface externa.</li>
+      </ol>
+      <div class="agents-list">
+        <span class="agent-badge badge-po">PO Agent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 3: Wireframes (only new/changed UI) -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-po">3</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>PO cria wireframes apenas para UI nova/alterada</h3>
+      <p>Mesma mecanica do greenfield (HTML puro, estados nomeados) mas com escopo restrito. Telas existentes que nao serao tocadas <strong>nao</strong> ganham wireframe &mdash; permanecem como estao.</p>
+      <div class="note-box warn">
+        <strong>EXTEND com mudanca de UI:</strong> se um EXTEND altera uma tela existente, o wireframe descreve apenas o <em>delta</em> (campos novos, novos estados), nao a tela inteira.
+      </div>
+      <div class="agents-list">
+        <span class="agent-badge badge-po">PO Agent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 4: User gate -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-user">4</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Gate de aprovacao do usuario</h3>
+      <p>Identico ao greenfield: usuario aprova <code>docs/wireframes/index.html</code>. Limite de 3 iteracoes. Se rejeitado na 3<sup>a</sup>, Tech Lead registra <code>DEC-TL-ADOPT-XXX</code> e decide entre abortar ou prosseguir com escopo reduzido.</p>
+      <div class="agents-list">
+        <span class="agent-badge" style="color:var(--accent); border-color:var(--accent)">Usuario</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 5: Contracts with extends/new -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-tl">5</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>Tech Lead cria contratos com <code>extends:</code> vs <code>new:</code></h3>
+      <p>Mesmo formato do greenfield (<code>## API</code> + <code>## Screen</code>), mas cada contrato declara explicitamente sua relacao com o codigo existente:</p>
+      <ol class="substeps">
+        <li><strong><code>new:</code></strong> &mdash; contrato cria endpoint/tela do zero. Schema completo, sem referencias a codigo legado.</li>
+        <li><strong><code>extends: src/api/users.ts:42</code></strong> &mdash; contrato adiciona campos ou novos verbos a um endpoint existente. O contrato descreve <em>somente o delta</em>, e referencia o arquivo/linha onde o codigo atual vive.</li>
+        <li><strong><code>refactors: src/legacy/auth.js</code></strong> &mdash; contrato mantem a interface externa identica e descreve apenas a nova implementacao interna.</li>
+      </ol>
+      <div class="note-box">
+        <strong>Verificacao:</strong> antes de salvar um contrato com <code>extends:</code>, Tech Lead confere via Grep que o path:line referenciado realmente existe no repo.
+      </div>
+      <div class="agents-list">
+        <span class="agent-badge badge-tl">Tech Lead</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 6: DevOps validate, don't create -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-devops">6</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>DevOps em modo <em>validar, nao criar</em></h3>
+      <p>DevOps <strong>nao</strong> roda scaffold completo. Em vez disso:</p>
+      <ol class="substeps">
+        <li><strong>Confere</strong> que as ferramentas listadas em <code>DECISIONS.md</code> rodam (executa os scripts de test/build ja existentes).</li>
+        <li><strong>Instala apenas o gap</strong> identificado pelo snapshot &mdash; tipicamente Playwright + diretorios <code>tests/e2e/specs/</code> e <code>tests/e2e/screenshots/</code>.</li>
+        <li><strong>Adiciona</strong> <code>.gitattributes</code> com <code>merge=union</code> para <code>docs/DECISIONS.md</code> e <code>docs/PROGRESS.md</code> (pre-requisito do <code>/dev-team-run</code> em paralelo).</li>
+        <li><strong>NAO toca</strong> em <code>package.json</code>, configs ou deps existentes alem do estritamente necessario para o gap.</li>
+      </ol>
+      <div class="note-box danger">
+        <strong>Regra de ouro:</strong> qualquer modificacao em arquivo existente do repo deve ser registrada como <code>DEC-DEVOPS-ADOPT-XXX</code> com diff explicito. Sem essa decisao, DevOps nao escreve no arquivo &mdash; vai para <code>blocked/</code>.
+      </div>
+      <div class="agents-list">
+        <span class="agent-badge badge-devops">DevOps</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 7: PO creates tasks -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-po">7</div>
+      <div class="flow-line"></div>
+    </div>
+    <div class="flow-card">
+      <h3>PO cria tarefas tipadas (FEATURE / EXTEND / REFACTOR)</h3>
+      <p>Tarefas em <code>board/todo/</code> seguem o mesmo formato do greenfield, com um campo extra no frontmatter:</p>
+      <ol class="substeps">
+        <li><code>kind: feature</code> &mdash; greenfield-like, codigo novo isolado.</li>
+        <li><code>kind: extend</code> &mdash; Context aponta para o arquivo legado a ser estendido.</li>
+        <li><code>kind: refactor</code> &mdash; Acceptance Criteria inclui "comportamento externo identico ao baseline (validado por re-run dos testes existentes)".</li>
+      </ol>
+      <div class="agents-list">
+        <span class="agent-badge badge-po">PO Agent</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 8: Coverage validation -->
+  <div class="flow-step">
+    <div class="flow-connector">
+      <div class="flow-dot dot-done">&check;</div>
+    </div>
+    <div class="flow-card">
+      <h3>Validacao de cobertura e handoff para <code>/dev-team-run</code></h3>
+      <p>PO valida que todas as features do PRD tem tarefa correspondente. A partir daqui o fluxo se reune ao greenfield: <code>/dev-team-run</code> roda o loop autonomo identico, com a unica diferenca de que os agentes Dev sabem ler <code>kind:</code> da tarefa para decidir se criam arquivo novo ou editam existente.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TASK LIFECYCLE                            -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Ciclo de Vida da Tarefa</div>
+<p style="text-align:center; color:var(--text-muted); font-size:0.88rem; max-width:800px; margin:0 auto 1rem;">
+  Identico ao greenfield: <code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">todo/ &rarr; in_progress/ &rarr; done/ &rarr; verified/</code>, com ramo <code style="color:var(--accent); background:rgba(88,166,255,0.1); padding:0.1rem 0.4rem; border-radius:4px;">blocked/</code>. Veja <a href="workflow.html#" style="color:var(--accent)">workflow.html</a> para o diagrama detalhado.
+</p>
+
+<!-- ════════════════════════════════════════ -->
+<!-- AGENTS                                   -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Agentes no Modo Brownfield</div>
+<div class="agent-grid">
+
+  <div class="agent-card new">
+    <span class="tag new">Novo</span>
+    <h4 style="color:var(--yellow)">Code Archaeologist</h4>
+    <div class="role">Analista de repo existente</div>
+    <div class="desc">Varre o repositorio e produz <code>docs/repo-snapshot.md</code>: stack detectada, frameworks, endpoints existentes (com path:line), runners de teste, scripts e infra. Read-only fora do snapshot.</div>
+    <div class="tools">Tools propostos: <code>Read</code> <code>Glob</code> <code>Grep</code> <code>Write</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag modified">Modificado</span>
+    <h4 style="color:var(--orange)">Tech Lead</h4>
+    <div class="role">Arquiteto &mdash; modo brownfield</div>
+    <div class="desc">Em vez de decidir stack do zero, le <code>repo-snapshot.md</code> e <em>documenta</em> a stack existente. Contratos diferenciam <code>extends:</code> de <code>new:</code> e referenciam codigo legado por path:line.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag modified">Modificado</span>
+    <h4 style="color:var(--cyan)">DevOps Agent</h4>
+    <div class="role">Infra &mdash; modo "validar, nao criar"</div>
+    <div class="desc">Confere que a infra existente roda. Instala apenas o gap (tipicamente Playwright + <code>.gitattributes</code>). Qualquer modificacao em arquivo existente exige <code>DEC-DEVOPS-ADOPT-XXX</code>.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag modified">Modificado</span>
+    <h4 style="color:var(--purple)">PO Agent</h4>
+    <div class="role">Product Owner &mdash; modo brownfield</div>
+    <div class="desc">Classifica requisitos como FEATURE / EXTEND / REFACTOR usando <code>repo-snapshot.md</code>. Wireframes apenas para UI nova/alterada. Tarefas ganham campo <code>kind:</code>.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Glob</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag unchanged">Inalterado</span>
+    <h4 style="color:var(--green)">Backend Agent</h4>
+    <div class="role">Desenvolvedor Backend</div>
+    <div class="desc">Le <code>kind:</code> da tarefa: <code>feature</code> cria arquivos novos, <code>extend</code> edita arquivo existente referenciado no contrato, <code>refactor</code> mantem interface externa.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag unchanged">Inalterado</span>
+    <h4 style="color:var(--pink)">Frontend Agent</h4>
+    <div class="role">Desenvolvedor Frontend</div>
+    <div class="desc">Mesma logica do Backend para <code>kind:</code>. Continua tratando os 3 estados (loading, error, empty).</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+  <div class="agent-card">
+    <span class="tag unchanged">Inalterado</span>
+    <h4 style="color:var(--red)">QA Agent</h4>
+    <div class="role">QA Engineer</div>
+    <div class="desc">Mesmo protocolo do greenfield. Smoke test final precisa cobrir tambem fluxos legados que possam ter sido afetados por <code>EXTEND</code>/<code>REFACTOR</code>.</div>
+    <div class="tools">Tools: <code>Read</code> <code>Write</code> <code>Edit</code> <code>Bash</code> <code>Glob</code> <code>Grep</code></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- NEW ARTIFACTS                            -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Artefatos Novos</div>
+<div class="parallel-grid">
+
+  <div class="parallel-card">
+    <h4>docs/repo-snapshot.md</h4>
+    <p>Output do <code>code-archaeologist</code>. Estrutura proposta:</p>
+    <ul>
+      <li><strong>Stack detectada</strong>: linguagens, frameworks, versoes (lidas dos manifests).</li>
+      <li><strong>Endpoints existentes</strong>: lista <code>METHOD /path</code> &rarr; <code>file:line</code>.</li>
+      <li><strong>Telas existentes</strong>: rota &rarr; componente principal &rarr; <code>file:line</code>.</li>
+      <li><strong>Infra de teste</strong>: runners instalados, presenca/ausencia de Playwright.</li>
+      <li><strong>Scripts</strong>: dev, build, test, lint &mdash; com comandos exatos.</li>
+      <li><strong>Infra</strong>: Dockerfile, docker-compose, CI configs.</li>
+    </ul>
+    <p style="margin-top:0.5rem;">E gerado uma vez no PASSO 0 e <strong>nao</strong> e atualizado durante <code>/dev-team-run</code> &mdash; e um snapshot, nao um indice vivo.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>DEC-TL-ADOPT-XXX / DEC-DEVOPS-ADOPT-XXX</h4>
+    <p>Convencao de prefixo para decisoes especificas do fluxo brownfield, registradas em <code>DECISIONS.md</code>:</p>
+    <ul>
+      <li><code>DEC-TL-ADOPT-001: Stack adotada do repo</code> &mdash; cada item da tabela Stack vira uma entrada.</li>
+      <li><code>DEC-DEVOPS-ADOPT-XXX</code> &mdash; toda modificacao em arquivo existente precisa de uma destas, com diff explicito.</li>
+    </ul>
+    <p style="margin-top:0.5rem;">Permite filtrar facilmente o que veio do legado vs o que foi acrescentado pelo orquestrador.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Campo <code>kind:</code> no frontmatter da tarefa</h4>
+    <p>Adicionado ao YAML existente das tarefas em <code>board/{status}/{ID}.md</code>:</p>
+    <ul>
+      <li><code>kind: feature</code> &mdash; novo, isolado.</li>
+      <li><code>kind: extend</code> &mdash; estende arquivo existente.</li>
+      <li><code>kind: refactor</code> &mdash; reimplementa preservando interface.</li>
+    </ul>
+    <p style="margin-top:0.5rem;">Greenfield continua funcionando sem o campo (default implicito: <code>feature</code>).</p>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- RISKS & SAFEGUARDS                       -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Riscos &amp; Salvaguardas</div>
+<div class="parallel-grid">
+
+  <div class="parallel-card">
+    <h4>Sobrescrita de codigo legado</h4>
+    <p><strong>Mitigacao:</strong> DevOps em modo "validar, nao criar". Qualquer edicao em arquivo existente exige <code>DEC-DEVOPS-ADOPT-XXX</code>. Recomendado rodar todo o fluxo em <strong>branch isolada</strong>.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Wireframes que retro-documentam o existente</h4>
+    <p><strong>Mitigacao:</strong> PO so cria wireframe para UI nova ou alterada. Wireframes para tela existente &rarr; rejeitados pelo Tech Lead na revisao.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Contratos <code>extends:</code> apontando para codigo que nao existe</h4>
+    <p><strong>Mitigacao:</strong> Tech Lead confere via Grep que o <code>path:line</code> referenciado existe antes de salvar o contrato. Pre-flight obrigatorio.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Quebra silenciosa de fluxos legados</h4>
+    <p><strong>Mitigacao:</strong> smoke test final do QA precisa cobrir tambem caminhos do PRD que <em>nao foram tocados</em> diretamente, mas dependem de codigo modificado por <code>EXTEND</code>/<code>REFACTOR</code>.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Conflito stack adotada vs requisito do PRD</h4>
+    <p><strong>Mitigacao:</strong> se um requisito exigir tecnologia ausente (ex: PRD pede WebSocket, repo nao tem), Tech Lead registra <code>DEC-TL-ADOPT-XXX</code> propondo a adicao e a tarefa correspondente vai como <code>kind: extend</code> com escopo de infra.</p>
+  </div>
+
+  <div class="parallel-card">
+    <h4>Snapshot desatualiza durante o run</h4>
+    <p><strong>Mitigacao:</strong> <code>repo-snapshot.md</code> e gerado uma unica vez no PASSO 0 e tratado como <strong>imutavel</strong> durante o <code>/dev-team-run</code>, exatamente como os contratos. Mudou? Aborta o run e re-roda <code>/dev-team-brownfield</code>.</p>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- ROADMAP                                  -->
+<!-- ════════════════════════════════════════ -->
+<div class="section-title">Roadmap de Implementacao</div>
+<div class="roadmap">
+
+  <div class="roadmap-item done">
+    <div class="step-num">1</div>
+    <div>
+      <h4>Documentacao visual do fluxo</h4>
+      <p>Este arquivo (<code>docs/workflow-brownfield.html</code>) descreve o fluxo pretendido. Nada de codigo ou comando ainda.</p>
+    </div>
+    <div class="status done">Feito</div>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="step-num">2</div>
+    <div>
+      <h4>Criar agente <code>code-archaeologist</code></h4>
+      <p>Adicionar <code>.claude/agents/code-archaeologist-agent.md</code> com protocolo de varredura e geracao de <code>docs/repo-snapshot.md</code>.</p>
+    </div>
+    <div class="status pending">Pendente</div>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="step-num">3</div>
+    <div>
+      <h4>Criar comando <code>/dev-team-brownfield</code></h4>
+      <p>Adicionar <code>.claude/commands/dev-team-brownfield.md</code> com os 9 passos descritos acima (PASSO 0 ate validacao de cobertura).</p>
+    </div>
+    <div class="status pending">Pendente</div>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="step-num">4</div>
+    <div>
+      <h4>Adaptar agentes existentes para "modo brownfield"</h4>
+      <p>Atualizar <code>tech-lead-agent</code>, <code>devops-agent</code> e <code>po-agent</code> para reconhecer presenca de <code>repo-snapshot.md</code> e seguir as regras descritas aqui (validar nao criar, classificar tarefas, etc.).</p>
+    </div>
+    <div class="status pending">Pendente</div>
+  </div>
+
+  <div class="roadmap-item">
+    <div class="step-num">5</div>
+    <div>
+      <h4>Adicionar suporte a <code>kind:</code> nas tarefas</h4>
+      <p>Atualizar skills <code>task-reader</code> / <code>task-writer</code> para parsear o novo campo. Greenfield continua funcionando sem ele.</p>
+    </div>
+    <div class="status pending">Pendente</div>
+  </div>
+
+</div>
+
+<div class="footer">
+  Dev Team Orchestrator &mdash; Workflow Brownfield (proposta) &middot; <a href="workflow.html" style="color:var(--accent); text-decoration:none;">workflow greenfield</a>
+</div>
+
+</body>
+</html>

@@ -1,12 +1,362 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Dev Team Orchestrator — Workflow</title>
-  <meta http-equiv="refresh" content="0; url=workflow.html">
-  <link rel="canonical" href="workflow.html">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dev Team Orchestrator</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface-2: #1c2128;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --orange: #d29922;
+    --purple: #bc8cff;
+    --cyan: #39d2c0;
+    --pink: #f778ba;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body {
+    position: relative;
+    padding: 4rem 2rem 3rem;
+  }
+
+  /* Glow background */
+  body::before {
+    content: "";
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1000px;
+    height: 1000px;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(88,166,255,0.18), transparent 55%),
+      radial-gradient(circle at 70% 60%, rgba(188,140,255,0.15), transparent 55%),
+      radial-gradient(circle at 50% 80%, rgba(57,210,192,0.12), transparent 55%);
+    filter: blur(40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center;
+    margin-bottom: 4rem;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 0.35rem 0.9rem;
+    background: rgba(88,166,255,0.1);
+    border: 1px solid rgba(88,166,255,0.3);
+    border-radius: 20px;
+    font-size: 0.78rem;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.2rem;
+    background: linear-gradient(135deg, #58a6ff 0%, #bc8cff 50%, #f778ba 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .tagline {
+    font-size: clamp(1rem, 2vw, 1.25rem);
+    color: var(--text-muted);
+    max-width: 680px;
+    margin: 0 auto 2rem;
+    line-height: 1.6;
+  }
+
+  .tagline strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .pattern {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.7rem 1.4rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 30px;
+    font-family: 'SF Mono', Menlo, Consolas, monospace;
+    font-size: 0.92rem;
+    color: var(--text);
+  }
+
+  .pattern .arrow { color: var(--text-muted); }
+  .pattern .cmd { color: var(--accent); }
+  .pattern .agent { color: var(--purple); }
+  .pattern .skill { color: var(--cyan); }
+
+  /* ── PILLARS ── */
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.2rem;
+    margin-bottom: 4rem;
+  }
+
+  .pillar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.6rem 1.4rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+
+  .pillar:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+
+  .pillar-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 0.9rem;
+  }
+
+  .pillar:nth-child(1) .pillar-icon { background: rgba(88,166,255,0.15); color: var(--accent); }
+  .pillar:nth-child(2) .pillar-icon { background: rgba(188,140,255,0.15); color: var(--purple); }
+  .pillar:nth-child(3) .pillar-icon { background: rgba(57,210,192,0.15); color: var(--cyan); }
+
+  .pillar h3 {
+    font-size: 1.02rem;
+    margin-bottom: 0.4rem;
+  }
+
+  .pillar p {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* ── WORKFLOWS ── */
+  .section-title {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    margin-bottom: 1.5rem;
+  }
+
+  .workflows {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.4rem;
+    margin-bottom: 3rem;
+  }
+
+  .wf-card {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.8rem 1.6rem;
+    overflow: hidden;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+  }
+
+  .wf-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 50%, rgba(88,166,255,0.08));
+    opacity: 0;
+    transition: opacity 0.25s;
+  }
+
+  .wf-card:hover {
+    transform: translateY(-4px);
+    border-color: var(--accent);
+    box-shadow: 0 12px 32px rgba(88,166,255,0.12);
+  }
+
+  .wf-card:hover::before { opacity: 1; }
+
+  .wf-card.brownfield:hover {
+    border-color: var(--purple);
+    box-shadow: 0 12px 32px rgba(188,140,255,0.12);
+  }
+
+  .wf-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 0.25rem 0.65rem;
+    border-radius: 20px;
+    margin-bottom: 0.9rem;
+    font-weight: 600;
+  }
+
+  .wf-card.greenfield .wf-tag {
+    background: rgba(63,185,80,0.12);
+    color: var(--green);
+    border: 1px solid rgba(63,185,80,0.3);
+  }
+
+  .wf-card.brownfield .wf-tag {
+    background: rgba(188,140,255,0.12);
+    color: var(--purple);
+    border: 1px solid rgba(188,140,255,0.3);
+  }
+
+  .wf-card h2 {
+    font-size: 1.45rem;
+    margin-bottom: 0.55rem;
+    position: relative;
+  }
+
+  .wf-card p {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    line-height: 1.55;
+    margin-bottom: 1.3rem;
+    position: relative;
+  }
+
+  .wf-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--accent);
+    position: relative;
+  }
+
+  .wf-card.brownfield .wf-cta { color: var(--purple); }
+
+  .wf-cta .arrow {
+    transition: transform 0.2s;
+  }
+
+  .wf-card:hover .wf-cta .arrow { transform: translateX(4px); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  @media (max-width: 720px) {
+    body { padding: 2.5rem 1.2rem 2rem; }
+    .pillars { grid-template-columns: 1fr; }
+    .workflows { grid-template-columns: 1fr; }
+  }
+</style>
 </head>
 <body>
-  <p>Redirecionando para <a href="workflow.html">workflow.html</a>...</p>
+<div class="wrap">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">Claude Code &middot; Multi-Agent Orchestration</div>
+    <h1>Dev Team Orchestrator</h1>
+    <p class="tagline">
+      Um <strong>time de agentes Claude Code</strong> que transforma um PRD em sistema funcional &mdash;
+      PO, Tech Lead, Backend, Frontend, QA e DevOps trabalhando em paralelo, com
+      kanban em pastas, worktrees isolados e validacao por screenshots Playwright.
+    </p>
+    <div class="pattern">
+      <span class="cmd">Command</span>
+      <span class="arrow">&rarr;</span>
+      <span class="agent">Agent</span>
+      <span class="arrow">&rarr;</span>
+      <span class="skill">Skill</span>
+    </div>
+  </section>
+
+  <!-- PILLARS -->
+  <section class="pillars">
+    <div class="pillar">
+      <div class="pillar-icon">&#9881;</div>
+      <h3>Paralelismo real</h3>
+      <p>Devs rodam em <code>git worktrees</code> isolados em branches <code>task/{ID}</code>, com squash-merge no final.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">&#9636;</div>
+      <h3>Board em pastas</h3>
+      <p>Kanban e o filesystem: <code>todo/</code>, <code>in_progress/</code>, <code>done/</code>, <code>verified/</code>, <code>blocked/</code>.</p>
+    </div>
+    <div class="pillar">
+      <div class="pillar-icon">&#10003;</div>
+      <h3>Screenshot = verdade</h3>
+      <p>QA valida com Playwright. Se o screenshot nao bate com o criterio de aceite, vira tarefa <code>FIX-*</code>.</p>
+    </div>
+  </section>
+
+  <!-- WORKFLOWS -->
+  <div class="section-title">Escolha o seu fluxo</div>
+  <section class="workflows">
+    <a href="workflow.html" class="wf-card greenfield">
+      <span class="wf-tag">Greenfield</span>
+      <h2>Workflow principal</h2>
+      <p>Comece do zero a partir de um PRD: wireframes, contratos, scaffold e o loop autonomo <code>/dev-team-run</code> ate tudo entrar em <code>verified/</code>.</p>
+      <span class="wf-cta">Ver fluxo completo <span class="arrow">&rarr;</span></span>
+    </a>
+    <a href="workflow-brownfield.html" class="wf-card brownfield">
+      <span class="wf-tag">Brownfield &middot; Proposta</span>
+      <h2>Workflow brownfield</h2>
+      <p>Adocao do orchestrator em repositorios com codigo existente. Estrategia, mapeamento e diferencas em relacao ao greenfield.</p>
+      <span class="wf-cta">Ver proposta <span class="arrow">&rarr;</span></span>
+    </a>
+  </section>
+
+  <footer>
+    Padrao: <code>Command &rarr; Agent &rarr; Skill</code> &middot;
+    <a href="https://github.com/anthropics/claude-code">Claude Code</a>
+  </footer>
+
+</div>
 </body>
 </html>
